@@ -20,14 +20,21 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 .pad{display:flex;gap:10px}.control{border:2px solid #b28cff;background:#2b1859;color:white;border-radius:12px;min-width:58px;height:54px;font: bold 20px monospace;box-shadow:0 4px #13082d;touch-action:none}
 .control:active{transform:translateY(3px);box-shadow:0 1px #13082d;background:#6d28d9}
 .restart{border:2px solid #ff83d2;background:#5b236f;color:#fff;border-radius:9px;padding:8px 11px;font:bold 12px monospace;box-shadow:0 3px #180b32;cursor:pointer}
-.restart:active{transform:translateY(2px);box-shadow:0 1px #180b32}
-@media(max-width:700px){.controls{display:flex}.help .desktop{display:none}}
+.restart:active,.fullscreen:active{transform:translateY(2px);box-shadow:0 1px #180b32}
+.fullscreen{border:2px solid #54e7ff;background:#173c68;color:#fff;border-radius:9px;padding:8px 11px;font:bold 12px monospace;box-shadow:0 3px #180b32;cursor:pointer}
+.wrap:fullscreen,.wrap.immersive{width:100vw;height:100dvh;max-width:none;padding:8px;display:flex;flex-direction:column;justify-content:center;background:#100b2d}
+.wrap:fullscreen .stage,.wrap.immersive .stage{width:100%;max-height:calc(100dvh - 135px);display:flex;align-items:center;justify-content:center}
+.wrap:fullscreen canvas,.wrap.immersive canvas{width:100%;height:auto;max-height:calc(100dvh - 135px);object-fit:contain}
+.wrap:fullscreen header,.wrap.immersive header{margin-bottom:6px}
+.wrap:fullscreen .help,.wrap.immersive .help{margin:6px 2px}
+@media(max-width:700px){.controls{display:flex}.help .desktop{display:none}.hud{gap:5px}.pill{padding:6px 8px;font-size:10px}.restart,.fullscreen{padding:7px 8px;font-size:10px}}
+@media(orientation:landscape) and (max-height:500px){body{padding:4px}.wrap{width:min(100%,1000px)}header{margin-bottom:4px}.logo{font-size:18px}.logo small{font-size:8px}.controls{margin-top:4px}.control{height:42px;min-width:50px}.help{margin:4px;font-size:10px}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="restart" id="restart" type="button">↻ Reiniciar</button></div></header>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
 <div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas></div>
 <div class="controls">
  <div class="pad"><button class="control" data-key="left">◀</button><button class="control" data-key="right">▶</button></div>
@@ -105,7 +112,7 @@ function update(){
  player.crouching=held.crouch && player.on;
  const targetH=player.crouching?player.crouchH:player.standH;
  if(targetH!==player.h){const feet=player.y+player.h;player.h=targetH;player.y=feet-player.h}
- if(player.crouching){player.vx*=.65}else if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
+ if(player.crouching){if(keys.left){player.vx=-1.8;player.dir=-1}else if(keys.right){player.vx=1.8;player.dir=1}else player.vx*=.65}else if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
  player.x+=player.vx;player.x=Math.max(0,Math.min(2860,player.x));
  player.vy+=.48;player.y+=player.vy;collide();
  if(player.y>H+40){lives--;player.x=Math.max(40,player.x-150);player.y=330;player.vy=0;focus=100;if(lives<=0)gameOver=true;updateHud()}
@@ -133,6 +140,16 @@ function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
 document.getElementById('restart').addEventListener('click',reset);
+const wrap=document.querySelector('.wrap'),fullBtn=document.getElementById('fullscreen');
+async function toggleFullscreen(){
+ try{
+   if(!document.fullscreenElement && wrap.requestFullscreen){await wrap.requestFullscreen();fullBtn.textContent='⛶ Sair da tela cheia';}
+   else if(document.fullscreenElement){await document.exitFullscreen();fullBtn.textContent='⛶ Tela cheia';}
+   else{wrap.classList.toggle('immersive');fullBtn.textContent=wrap.classList.contains('immersive')?'⛶ Sair da tela cheia':'⛶ Tela cheia';}
+ }catch(err){wrap.classList.toggle('immersive');fullBtn.textContent=wrap.classList.contains('immersive')?'⛶ Sair da tela cheia':'⛶ Tela cheia';}
+}
+fullBtn.addEventListener('click',toggleFullscreen);
+document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){fullBtn.textContent='⛶ Tela cheia';}});
 reset();loop();
 })();
 </script>
