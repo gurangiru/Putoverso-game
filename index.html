@@ -100,7 +100,7 @@ function playTone(freq=520,duration=.09){
 }
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1450,y:355,taken:false},{x:2670,y:400,taken:false}];
-const jokeHazards=[{x:650,y:386,w:54,h:34},{x:1120,y:376,w:62,h:34},{x:1840,y:421,w:60,h:34},{x:2300,y:386,w:58,h:34}];
+const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1120,y:368,w:66,h:42},{x:1840,y:413,w:66,h:42},{x:2300,y:378,w:66,h:42}];
 function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;discs.forEach(d=>d.taken=false);updateHud()}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%'}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
@@ -148,7 +148,27 @@ function drawPlatforms(){
  }
 }
 function drawDisc(d){let x=d.x-cam;if(x<-30||x>W+30||d.taken)return;ctx.save();ctx.translate(x,d.y+Math.sin(frame*.08)*4);ctx.fillStyle='#ffeb65';ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f6a6ff';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5131a0';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-8,-7,5,2);ctx.restore()}
-function drawHazards(){for(const h of jokeHazards){let x=h.x-cam;if(x<-80||x>W+80)continue;rect(x,h.y,h.w,h.h,'#5a2d88');rect(x+5,h.y-8,h.w-10,10,'#ff64c9');text('HA!',x+7,h.y+23,15,'#fff27a');}}
+function drawLaughHorse(x,y){
+ const bob=Math.sin(frame*.18)*2;
+ ctx.save();ctx.translate(Math.round(x),Math.round(y+bob));
+ // Corpo, patas e pescoço
+ rect(12,31,8,18,'#633a83');rect(27,31,8,18,'#633a83');
+ rect(8,15,34,23,'#b879e8');rect(5,19,8,13,'#8d54c8');
+ rect(31,9,13,25,'#b879e8');rect(35,2,20,19,'#d99cff');
+ rect(47,10,13,11,'#d99cff');rect(53,14,8,7,'#f4c4ff');
+ // Orelhas, crina, olho e boca aberta
+ rect(38,-5,6,10,'#d99cff');rect(49,-3,6,9,'#d99cff');
+ rect(40,-3,2,5,'#ff79b8');rect(51,-1,2,4,'#ff79b8');
+ rect(32,5,7,18,'#7134a5');rect(29,12,7,7,'#ffcf4a');
+ rect(46,8,4,4,'#25133f');rect(45,15,12,7,'#57205e');rect(48,17,7,3,'#ff6f9f');
+ rect(2,16,7,7,'#7134a5');rect(0,22,7,7,'#ffcf4a');
+ const lift=(frame%34)/34*15;
+ text('HA!',x+57,y-5-lift,13,'#fff36a');text('HA!',x+70,y-17-lift*.65,11,'#ff75d5');
+ ctx.restore();
+}
+function drawHazards(){
+ for(const h of jokeHazards){let x=h.x-cam;if(x<-110||x>W+100)continue;drawLaughHorse(x,h.y-10);}
+}
 function drawShot(s){ctx.fillStyle='#58f3ff';ctx.beginPath();ctx.arc(s.x-cam,s.y,10+s.life%3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff5bd6';ctx.beginPath();ctx.arc(s.x-cam,s.y,4,0,Math.PI*2);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=['#ffe45b','#ff5bd6','#62f7ff'][i];ctx.fillRect(s.x-cam-18-i*8,s.y-3+i*3,5,5)}}
 function collide(){
  player.on=false;
@@ -174,12 +194,15 @@ function update(){
  cam=Math.max(0,Math.min(2040,player.x-330));
 }
 function draw(){
+ // Zoom da câmera aproxima a ação sem ampliar HUD ou controles.
+ const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
+ ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
  drawBackground();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
- // sign
  if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
+ ctx.restore();
  if(won||gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text(won?'PUTOVERSO SALVO!':'FIM DE JOGO',W/2-175,220,32,'#ffe65c');text(won?'A Alpaca recuperou as 3 musgas!':'Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
