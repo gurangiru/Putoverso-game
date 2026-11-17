@@ -63,7 +63,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><div class="pill">♫ Ondas: <b id="ammo">5/5</b></div><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
 <div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas>
 <div class="menu-screen" id="menuScreen"><div class="menu-panel">
 <div class="menu-title">PUTOVERSO</div>
@@ -81,8 +81,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <script>
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
-const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus')};
-let player,cds,lives,focus,shots,particles,cam,frame,won,gameOver,started=false,soundEnabled=true,audioCtx=null;
+const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus'),ammo:document.getElementById('ammo')};
+let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,started=false,soundEnabled=true,audioCtx=null;
 const held={crouch:false};
 const menuScreen=document.getElementById('menuScreen');
 function playTone(freq=520,duration=.09){
@@ -101,8 +101,8 @@ function playTone(freq=520,duration=.09){
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1450,y:355,taken:false},{x:2670,y:400,taken:false}];
 const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1120,y:368,w:66,h:42},{x:1840,y:413,w:66,h:42},{x:2300,y:378,w:66,h:42}];
-function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;discs.forEach(d=>d.taken=false);updateHud()}
-function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%'}
+function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
+function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5'}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function text(t,x,y,size=18,color='#fff'){ctx.font=`bold ${size}px monospace`;ctx.fillStyle='#241044';ctx.fillText(t,x+2,y+2);ctx.fillStyle=color;ctx.fillText(t,x,y)}
 function cloud(x,y,s=1){ctx.fillStyle='#ffffff';ctx.fillRect(x,y,42*s,16*s);ctx.fillRect(x+10*s,y-12*s,25*s,28*s);ctx.fillRect(x+30*s,y-5*s,25*s,21*s);ctx.fillStyle='#c9f4ff';ctx.fillRect(x+5*s,y+12*s,43*s,4*s)}
@@ -134,7 +134,8 @@ function alpaca(x,y,anim=0,dir=1,attack=0){
  ctx.restore();
 }
 function drawBackground(){
- const g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'#67d8ff');g.addColorStop(.72,'#c4f5ff');g.addColorStop(1,'#efffc7');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ // O preenchimento principal é feito em coordenadas da tela, antes do zoom.
+
  // distant hills
  for(let i=0;i<8;i++){let x=((i*190-cam*.22)%1200+1200)%1200-100;ctx.fillStyle=i%2?'#7edc9a':'#8ee8a8';ctx.beginPath();ctx.arc(x,390,125,Math.PI,0);ctx.fill()}
  for(let i=0;i<6;i++)cloud(((i*230-cam*.35)%1150+1150)%1150-80,75+(i%3)*55,.8+(i%2)*.25);
@@ -148,36 +149,48 @@ function drawPlatforms(){
  }
 }
 function drawDisc(d){let x=d.x-cam;if(x<-30||x>W+30||d.taken)return;ctx.save();ctx.translate(x,d.y+Math.sin(frame*.08)*4);ctx.fillStyle='#ffeb65';ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f6a6ff';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5131a0';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-8,-7,5,2);ctx.restore()}
-function drawLaughHorse(x,y){
- const bob=Math.sin(frame*.18)*2;
+function drawLaughHorse(x,y,faceDir=1,stunned=0){
+ const bob=stunned>0?0:Math.sin(frame*.18)*2;
  ctx.save();ctx.translate(Math.round(x),Math.round(y+bob));
+ if(faceDir<0){ctx.translate(62,0);ctx.scale(-1,1)}
+ if(stunned>0){ctx.translate(31,24);ctx.rotate(-Math.PI/2);ctx.translate(-31,-24);ctx.globalAlpha=.82}
  // Corpo, patas e pescoço
  rect(12,31,8,18,'#633a83');rect(27,31,8,18,'#633a83');
  rect(8,15,34,23,'#b879e8');rect(5,19,8,13,'#8d54c8');
  rect(31,9,13,25,'#b879e8');rect(35,2,20,19,'#d99cff');
  rect(47,10,13,11,'#d99cff');rect(53,14,8,7,'#f4c4ff');
- // Orelhas, crina, olho e boca aberta
+ // Orelhas, crina, olho e boca
  rect(38,-5,6,10,'#d99cff');rect(49,-3,6,9,'#d99cff');
  rect(40,-3,2,5,'#ff79b8');rect(51,-1,2,4,'#ff79b8');
  rect(32,5,7,18,'#7134a5');rect(29,12,7,7,'#ffcf4a');
  rect(46,8,4,4,'#25133f');rect(45,15,12,7,'#57205e');rect(48,17,7,3,'#ff6f9f');
  rect(2,16,7,7,'#7134a5');rect(0,22,7,7,'#ffcf4a');
- const lift=(frame%34)/34*15;
- text('HA!',x+57,y-5-lift,13,'#fff36a');text('HA!',x+70,y-17-lift*.65,11,'#ff75d5');
  ctx.restore();
+ if(stunned>0){text('Zz',x+38,y-10,16,'#fff36a');text('✦',x+4,y+2,12,'#ff75d5')}
+ else{
+  const lift=(frame%34)/34*15;
+  text('HA!',faceDir<0?x-25:x+57,y-5-lift,13,'#fff36a');
+  text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5');
+ }
 }
 function drawHazards(){
- for(const h of jokeHazards){let x=h.x-cam;if(x<-110||x>W+100)continue;drawLaughHorse(x,h.y-10);}
+ for(const h of jokeHazards){
+  let x=h.x-cam;if(x<-110||x>W+100)continue;
+  const faceDir=(player.x+player.w/2 < h.x+33)?-1:1;
+  drawLaughHorse(x,h.y-10,faceDir,h.stunned||0);
+ }
 }
 function drawShot(s){ctx.fillStyle='#58f3ff';ctx.beginPath();ctx.arc(s.x-cam,s.y,10+s.life%3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff5bd6';ctx.beginPath();ctx.arc(s.x-cam,s.y,4,0,Math.PI*2);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=['#ffe45b','#ff5bd6','#62f7ff'][i];ctx.fillRect(s.x-cam-18-i*8,s.y-3+i*3,5,5)}}
 function collide(){
  player.on=false;
  for(const p of platforms){if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+18&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}
 }
-function hitHazard(){for(const h of jokeHazards){if(player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
+function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
 function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
+function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
+ jokeHazards.forEach(h=>{if(h.stunned>0)h.stunned--});
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
  const targetH=player.crouching?player.crouchH:player.standH;
@@ -187,14 +200,26 @@ function update(){
  player.vy+=.48;player.y+=player.vy;collide();
  if(player.y>H+40){lives--;player.x=Math.max(40,player.x-150);player.y=330;player.vy=0;focus=100;if(lives<=0)gameOver=true;updateHud()}
  hitHazard();
- for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
- shots=shots.filter(s=>{s.x+=s.vx;s.life--;return s.life>0});
+ for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;ammo=5;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
+ shots=shots.filter(s=>{
+  s.x+=s.vx;s.life--;
+  for(const h of jokeHazards){
+   if((h.stunned||0)<=0&&s.x>=h.x-4&&s.x<=h.x+h.w+4&&s.y>=h.y-15&&s.y<=h.y+42){
+    h.stunned=180;playTone(300,.12);burstAt(h.x+30,h.y+12);return false;
+   }
+  }
+  return s.life>0;
+ });
  particles=particles.filter(p=>{p.t++;if(p.vx){p.x+=p.vx;p.y+=p.vy;p.vy+=.08}return p.t<35});
  if(player.x>2780&&cds===3)won=true;
  cam=Math.max(0,Math.min(2040,player.x-330));
 }
 function draw(){
- // Zoom da câmera aproxima a ação sem ampliar HUD ou controles.
+ // Fundo fixo: cobre todo o canvas mesmo quando a câmera aproxima a cena.
+ ctx.save();ctx.setTransform(1,0,0,1,0,0);
+ const bg=ctx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#67d8ff');bg.addColorStop(.72,'#c4f5ff');bg.addColorStop(1,'#efffc7');
+ ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);ctx.restore();
+ // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
  drawBackground();drawPlatforms();drawHazards();discs.forEach(drawDisc);
@@ -207,7 +232,7 @@ function draw(){
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
-function attack(){if(!started||gameOver||won)return;playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
+function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
 function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();started=true;menuScreen.hidden=true;}}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
