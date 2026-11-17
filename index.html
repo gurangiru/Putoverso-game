@@ -39,16 +39,42 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 }
 @media(max-width:700px){.controls{display:flex}.help .desktop{display:none}.hud{gap:5px}.pill{padding:6px 8px;font-size:10px}.restart,.fullscreen{padding:7px 8px;font-size:10px}}
 @media(orientation:landscape) and (max-height:500px){body{padding:4px}.wrap{width:min(100%,1000px)}header{margin-bottom:4px}.logo{font-size:18px}.logo small{font-size:8px}.controls{margin-top:4px}.control{height:42px;min-width:50px}.help{margin:4px;font-size:10px}}
+
+.stage{position:relative}
+.menu-screen{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:16px;background:linear-gradient(135deg,#13092dcc,#37105dcc)}
+.menu-screen[hidden]{display:none}
+.menu-panel{width:min(92%,560px);padding:clamp(16px,4vw,30px);text-align:center;border:4px solid #ffe45b;border-radius:18px;background:linear-gradient(160deg,#32145f,#17103d);box-shadow:0 0 0 5px #e83eb4,0 14px 0 #100722,0 0 35px #65eaff88}
+.menu-title{font-size:clamp(30px,6vw,54px);line-height:1.05;font-weight:1000;letter-spacing:2px;color:#ffe45b;text-shadow:3px 3px #e52cb7,6px 6px #15103c}
+.menu-sub{margin:12px 0;color:#c9f7ff;font-size:clamp(11px,2vw,15px);line-height:1.6}
+.menu-tag{display:inline-block;margin:4px;padding:6px 9px;border:1px solid #a78bfa;border-radius:8px;background:#25134b;color:#fff;font-size:11px}
+.play-button{margin-top:12px;border:3px solid #fff19a;border-radius:12px;padding:12px 28px;background:linear-gradient(#ff69c9,#c02691);color:#fff;font:bold 20px monospace;box-shadow:0 5px #6c1c67;cursor:pointer}
+.play-button:active{transform:translateY(4px);box-shadow:0 1px #6c1c67}
+.sound-toggle{border:2px solid #7cf1ff;background:#17476b;color:#fff;border-radius:9px;padding:8px 10px;font:bold 12px monospace;box-shadow:0 3px #180b32;cursor:pointer}
+@media(max-width:700px){.sound-toggle{padding:7px 8px;font-size:10px}}
+@media(orientation:landscape) and (max-height:500px){
+ .menu-panel{padding:10px 18px}
+ .menu-sub{margin:6px 0}
+ .menu-tag{padding:4px 7px}
+ .play-button{margin-top:5px;padding:8px 22px}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
-<div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas></div>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
+<div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas>
+<div class="menu-screen" id="menuScreen"><div class="menu-panel">
+<div class="menu-title">PUTOVERSO</div>
+<div class="menu-sub">ALPACA COLORIDA<br>A MUSGA VAI SALVAR O DIA!</div>
+<div><span class="menu-tag">💿 RECUPERE 3 CDs</span><span class="menu-tag">🎧 PROTEJA SEU CONTROLE</span></div>
+<button class="play-button" id="playButton" type="button">▶ JOGAR</button>
+<div class="menu-sub">Setas / A-D para andar · Espaço para pular · X para Onda Sonora</div>
+</div></div></div>
 <div class="controls">
  <div class="pad"><button class="control" data-key="left">◀</button><button class="control" data-key="right">▶</button></div>
- <div class="pad"><button class="control" data-key="crouch">▼</button><button class="control" data-key="jump">⤒</button><button class="control" data-key="sound">♫</button></div>
+ <div class="pad"><button class="control" data-key="crouch">▼</button><button class="control" data-key="jump">⤒</button><button class="control" data-key="attack">♫</button></div>
 </div>
 <div class="help"><span class="desktop">← → mover • ↓/S agachar • Espaço/W/↑ pular • X atacar</span><span>Toque nos botões para jogar no celular.</span><span>R reinicia a fase</span></div>
 </div>
@@ -56,8 +82,22 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
 const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus')};
-let player,cds,lives,focus,shots,particles,cam,frame,won,gameOver;
+let player,cds,lives,focus,shots,particles,cam,frame,won,gameOver,started=false,soundEnabled=true,audioCtx=null;
 const held={crouch:false};
+const menuScreen=document.getElementById('menuScreen');
+function playTone(freq=520,duration=.09){
+ if(!soundEnabled)return;
+ try{
+  audioCtx=audioCtx||new (window.AudioContext||window.webkitAudioContext)();
+  if(audioCtx.state==='suspended')audioCtx.resume();
+  const osc=audioCtx.createOscillator(),gain=audioCtx.createGain();
+  osc.type='square';osc.frequency.value=freq;
+  gain.gain.setValueAtTime(.04,audioCtx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);
+  osc.connect(gain);gain.connect(audioCtx.destination);
+  osc.start();osc.stop(audioCtx.currentTime+duration);
+ }catch(_){}
+}
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1450,y:355,taken:false},{x:2670,y:400,taken:false}];
 const jokeHazards=[{x:650,y:386,w:54,h:34},{x:1120,y:376,w:62,h:34},{x:1840,y:421,w:60,h:34},{x:2300,y:386,w:58,h:34}];
@@ -117,7 +157,7 @@ function collide(){
 function hitHazard(){for(const h of jokeHazards){if(player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
 function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
- frame++;if(gameOver||won)return;
+ frame++;if(!started||gameOver||won)return;
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
  const targetH=player.crouching?player.crouchH:player.standH;
@@ -127,7 +167,7 @@ function update(){
  player.vy+=.48;player.y+=player.vy;collide();
  if(player.y>H+40){lives--;player.x=Math.max(40,player.x-150);player.y=330;player.vy=0;focus=100;if(lives<=0)gameOver=true;updateHud()}
  hitHazard();
- for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;focus=Math.min(100,focus+12);updateHud();burst()}}
+ for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
  shots=shots.filter(s=>{s.x+=s.vx;s.life--;return s.life>0});
  particles=particles.filter(p=>{p.t++;if(p.vx){p.x+=p.vx;p.y+=p.vy;p.vy+=.08}return p.t<35});
  if(player.x>2780&&cds===3)won=true;
@@ -144,12 +184,19 @@ function draw(){
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
-function attack(){if(gameOver||won)return;player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
-function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r')reset()}
+function attack(){if(!started||gameOver||won)return;playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
+function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();started=true;menuScreen.hidden=true;}}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
-document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
-document.getElementById('restart').addEventListener('click',reset);
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='attack')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
+document.getElementById('restart').addEventListener('click',()=>{reset();started=true;menuScreen.hidden=true;});
+document.getElementById('playButton').addEventListener('click',()=>{started=true;menuScreen.hidden=true;playTone(660,.12);});
+const soundToggle=document.getElementById('soundToggle');
+soundToggle.addEventListener('click',()=>{
+ soundEnabled=!soundEnabled;
+ soundToggle.textContent=soundEnabled?'♫ Som: ON':'♫ Som: OFF';
+ if(soundEnabled)playTone(660,.1);
+});
 const wrap=document.querySelector('.wrap'),fullBtn=document.getElementById('fullscreen');
 async function toggleFullscreen(){
  try{
@@ -161,7 +208,7 @@ async function toggleFullscreen(){
 }
 fullBtn.addEventListener('click',toggleFullscreen);
 document.addEventListener('fullscreenchange',()=>{if(!document.fullscreenElement){fullBtn.textContent='⛶ Tela cheia';}});
-reset();loop();
+reset();menuScreen.hidden=false;loop();
 })();
 </script>
 </body></html>
