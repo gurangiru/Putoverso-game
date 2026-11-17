@@ -19,29 +19,32 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 .controls{display:none;justify-content:space-between;align-items:center;gap:12px;margin-top:10px;user-select:none}
 .pad{display:flex;gap:10px}.control{border:2px solid #b28cff;background:#2b1859;color:white;border-radius:12px;min-width:58px;height:54px;font: bold 20px monospace;box-shadow:0 4px #13082d;touch-action:none}
 .control:active{transform:translateY(3px);box-shadow:0 1px #13082d;background:#6d28d9}
+.restart{border:2px solid #ff83d2;background:#5b236f;color:#fff;border-radius:9px;padding:8px 11px;font:bold 12px monospace;box-shadow:0 3px #180b32;cursor:pointer}
+.restart:active{transform:translateY(2px);box-shadow:0 1px #180b32}
 @media(max-width:700px){.controls{display:flex}.help .desktop{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div></div></header>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><button class="restart" id="restart" type="button">↻ Reiniciar</button></div></header>
 <div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas></div>
 <div class="controls">
  <div class="pad"><button class="control" data-key="left">◀</button><button class="control" data-key="right">▶</button></div>
- <div class="pad"><button class="control" data-key="jump">⤒</button><button class="control" data-key="sound">♫</button></div>
+ <div class="pad"><button class="control" data-key="crouch">▼</button><button class="control" data-key="jump">⤒</button><button class="control" data-key="sound">♫</button></div>
 </div>
-<div class="help"><span class="desktop">← → mover • Espaço/W/↑ pular • X atacar com Onda Sonora</span><span>Toque nos botões para jogar no celular.</span><span>R reinicia a fase</span></div>
+<div class="help"><span class="desktop">← → mover • ↓/S agachar • Espaço/W/↑ pular • X atacar</span><span>Toque nos botões para jogar no celular.</span><span>R reinicia a fase</span></div>
 </div>
 <script>
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
 const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus')};
 let player,cds,lives,focus,shots,particles,cam,frame,won,gameOver;
+const held={crouch:false};
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1450,y:355,taken:false},{x:2670,y:400,taken:false}];
 const jokeHazards=[{x:650,y:386,w:54,h:34},{x:1120,y:376,w:62,h:34},{x:1840,y:421,w:60,h:34},{x:2300,y:386,w:58,h:34}];
-function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,on:false,dir:1,inv:0,anim:0,attack:0};cds=0;lives=3;focus=100;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;discs.forEach(d=>d.taken=false);updateHud()}
+function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;discs.forEach(d=>d.taken=false);updateHud()}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%'}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function text(t,x,y,size=18,color='#fff'){ctx.font=`bold ${size}px monospace`;ctx.fillStyle='#241044';ctx.fillText(t,x+2,y+2);ctx.fillStyle=color;ctx.fillText(t,x,y)}
@@ -99,7 +102,10 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function update(){
  frame++;if(gameOver||won)return;
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
- if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
+ player.crouching=held.crouch && player.on;
+ const targetH=player.crouching?player.crouchH:player.standH;
+ if(targetH!==player.h){const feet=player.y+player.h;player.h=targetH;player.y=feet-player.h}
+ if(player.crouching){player.vx*=.65}else if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
  player.x+=player.vx;player.x=Math.max(0,Math.min(2860,player.x));
  player.vy+=.48;player.y+=player.vy;collide();
  if(player.y>H+40){lives--;player.x=Math.max(40,player.x-150);player.y=330;player.vy=0;focus=100;if(lives<=0)gameOver=true;updateHud()}
@@ -113,7 +119,7 @@ function update(){
 function draw(){
  drawBackground();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
- if(player.inv%10<6)alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack);
+ if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
  // sign
  if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
@@ -122,10 +128,11 @@ function draw(){
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function attack(){if(gameOver||won)return;player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
-function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp',' ','x','X','a','d','w'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r')reset()}
-function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false}
+function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r')reset()}
+function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
-document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack()};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
+document.getElementById('restart').addEventListener('click',reset);
 reset();loop();
 })();
 </script>

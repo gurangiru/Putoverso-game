@@ -4,17 +4,15 @@ Protótipo jogável da primeira fase, Campos da Desarmonia.
 
 ## Como jogar
 - Setas esquerda/direita ou A/D: mover
+- Seta para baixo ou S: agachar (segure)
 - Espaço, W ou seta para cima: pular
 - X: disparar Onda Sonora
-- R: reiniciar
+- Botão ↻ Reiniciar: reinicia a fase
+- R: reiniciar pelo teclado
 
-No celular, use os botões na tela.
+No celular, use os botões na tela: ◀ ▶ ▼ ⤒ ♫
 
 ## Publicar no GitHub Pages
-1. Crie um repositório no GitHub.
-2. Envie `index.html` para a raiz do repositório.
-3. Abra Settings → Pages.
-4. Em Build and deployment, selecione Deploy from a branch.
-5. Escolha `main` e `/ (root)` e salve.
+Envie `index.html` e `README.md` para a raiz do repositório. Se já publicou uma versão anterior, substitua o `index.html` pelo atualizado e aguarde o Pages concluir a publicação.
 
 Este protótipo usa Canvas e JavaScript puro, sem bibliotecas externas.
