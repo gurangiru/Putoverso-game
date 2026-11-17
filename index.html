@@ -27,6 +27,16 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 .wrap:fullscreen canvas,.wrap.immersive canvas{width:100%;height:auto;max-height:calc(100dvh - 135px);object-fit:contain}
 .wrap:fullscreen header,.wrap.immersive header{margin-bottom:6px}
 .wrap:fullscreen .help,.wrap.immersive .help{margin:6px 2px}
+.wrap:fullscreen .controls,.wrap.immersive .controls{display:flex !important;flex-shrink:0;justify-content:space-between;gap:12px}
+.wrap:fullscreen .control,.wrap.immersive .control{min-width:clamp(48px,8vw,68px);height:clamp(44px,9vh,62px);font-size:clamp(18px,3vh,24px)}
+.wrap:fullscreen .stage,.wrap.immersive .stage{flex:1;min-height:0;max-height:none}
+.wrap:fullscreen canvas,.wrap.immersive canvas{width:100%;height:100%;max-height:100%;object-fit:contain}
+@media(orientation:landscape) and (max-height:500px){
+ .wrap:fullscreen header,.wrap.immersive header{gap:4px}
+ .wrap:fullscreen .logo small,.wrap.immersive .logo small{display:none}
+ .wrap:fullscreen .help,.wrap.immersive .help{display:none}
+ .wrap:fullscreen .controls,.wrap.immersive .controls{margin-top:4px}
+}
 @media(max-width:700px){.controls{display:flex}.help .desktop{display:none}.hud{gap:5px}.pill{padding:6px 8px;font-size:10px}.restart,.fullscreen{padding:7px 8px;font-size:10px}}
 @media(orientation:landscape) and (max-height:500px){body{padding:4px}.wrap{width:min(100%,1000px)}header{margin-bottom:4px}.logo{font-size:18px}.logo small{font-size:8px}.controls{margin-top:4px}.control{height:42px;min-width:50px}.help{margin:4px;font-size:10px}}
 </style>
@@ -138,12 +148,13 @@ function attack(){if(gameOver||won)return;player.attack=18;shots.push({x:player.
 function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r')reset()}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
-document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',down);b.addEventListener('pointerup',up);b.addEventListener('pointerleave',up);b.addEventListener('pointercancel',up)});
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='sound')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
 document.getElementById('restart').addEventListener('click',reset);
 const wrap=document.querySelector('.wrap'),fullBtn=document.getElementById('fullscreen');
 async function toggleFullscreen(){
  try{
-   if(!document.fullscreenElement && wrap.requestFullscreen){await wrap.requestFullscreen();fullBtn.textContent='⛶ Sair da tela cheia';}
+   if(!document.fullscreenElement && wrap.requestFullscreen){await wrap.requestFullscreen();fullBtn.textContent='⛶ Sair da tela cheia';
+   try{if(screen.orientation&&screen.orientation.lock)await screen.orientation.lock('landscape')}catch(_){/* O navegador pode não permitir bloqueio de orientação. */}}
    else if(document.fullscreenElement){await document.exitFullscreen();fullBtn.textContent='⛶ Tela cheia';}
    else{wrap.classList.toggle('immersive');fullBtn.textContent=wrap.classList.contains('immersive')?'⛶ Sair da tela cheia':'⛶ Tela cheia';}
  }catch(err){wrap.classList.toggle('immersive');fullBtn.textContent=wrap.classList.contains('immersive')?'⛶ Sair da tela cheia':'⛶ Tela cheia';}
