@@ -210,11 +210,11 @@ function drawShield(x,y,anim){
 }
 function drawWater(){
  // Água decorativa sob o trajeto: a queda continua tendo a mesma consequência.
- const left=cam-120,right=cam+W+120,top=492;
+ const left=-200,right=W+200,top=492;
  const water=ctx.createLinearGradient(0,top,0,850);
  water.addColorStop(0,'#39c9ee');water.addColorStop(.35,'#168fc9');water.addColorStop(1,'#14518f');
  ctx.fillStyle=water;ctx.fillRect(left,top,right-left,900-top);
- // Faixa de espuma e pequenas ondas em pixel art.
+ // Faixa de espuma e pequenas ondas em pixel art, cobrindo toda a área visível.
  for(let x=Math.floor(left/42)*42;x<right;x+=42){
   const bob=Math.sin(frame*.075+x*.025)*4;
   rect(x,top+bob,24,4,'#a7f5ff');
