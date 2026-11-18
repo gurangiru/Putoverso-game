@@ -165,10 +165,10 @@ function alpaca(x,y,anim=0,dir=1,attack=0,moving=false,airborne=false){
 }
 function drawBackground(){
  if(currentPhase===2){
-  const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#292b75');sky.addColorStop(.58,'#7655a8');sky.addColorStop(1,'#ff9acb');ctx.fillStyle=sky;ctx.fillRect(-500,-300,2200,1200);
+  const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#292b75');sky.addColorStop(.58,'#7655a8');sky.addColorStop(1,'#ff9acb');ctx.fillStyle=sky;ctx.fillRect(-500,-300,worldWidth+1000,1200);
   ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(720,95,48,0,Math.PI*2);ctx.fill();
   for(let i=0;i<22;i++){const bx=i*235-((cam*.16)%235),bh=100+(i*47)%170;ctx.fillStyle=['#30275f','#3d3478','#493477'][i%3];ctx.fillRect(bx,455-bh,145,bh);ctx.fillStyle='#7cf0ff';for(let wy=470-bh;wy<440;wy+=28)for(let wx=bx+16;wx<bx+130;wx+=30)ctx.fillRect(wx,wy,9,12)}
-  ctx.fillStyle='#ffdc8a';ctx.fillRect(-500,455,2200,100);return;
+  ctx.fillStyle='#ffdc8a';ctx.fillRect(-500,455,worldWidth+1000,100);return;
  }
  // Montanhas distantes em duas camadas para dar profundidade ao horizonte.
  for(let layer=0;layer<2;layer++){
@@ -598,7 +598,7 @@ function draw(){
   ctx.restore();}
  if(victoryTimer>0){ctx.save();ctx.globalAlpha=Math.min(1,victoryTimer/25);ctx.fillStyle='#fff2a8';ctx.font='bold 18px monospace';ctx.fillText('✦',4300-cam,325);ctx.fillText('✦',4370-cam,315);ctx.restore();}
  ctx.restore();
- if(won){document.getElementById('victoryActions').classList.add('show');document.getElementById('nextPhaseButton').disabled=!cityUnlocked;ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text(currentPhase===1?'CAMPOS DA DESARMONIA':'CIDADE DO DUPLO SENTIDO',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text(currentPhase===1?'PRÓXIMA AVENTURA':'PRÓXIMO DESTINO',W/2-135,310,15,'#ffe66b');text(currentPhase===1?'CIDADE DO DUPLO SENTIDO':'CASTELO DA VERGONHA ALHEIA',W/2-190,348,16,'#8ff4ff');text(currentPhase===1?(cityUnlocked?'FASE 2 DESBLOQUEADA!':'A próxima aventura está chegando...'):'FASE 2 CONCLUÍDA!',W/2-190,382,14,'#ffe66b');text('Use os botões para continuar',W/2-170,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
+ if(won){document.getElementById('victoryActions').classList.add('show');document.getElementById('nextPhaseButton').disabled=!cityUnlocked;document.getElementById('nextPhaseButton').hidden=currentPhase===2;document.getElementById('replayButton').textContent=currentPhase===1?'↻ JOGAR NOVAMENTE':'↻ JOGAR FASE 2 NOVAMENTE';ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text(currentPhase===1?'CAMPOS DA DESARMONIA':'CIDADE DO DUPLO SENTIDO',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text(currentPhase===1?'PRÓXIMA AVENTURA':'PRÓXIMO DESTINO',W/2-135,310,15,'#ffe66b');text(currentPhase===1?'CIDADE DO DUPLO SENTIDO':'CASTELO DA VERGONHA ALHEIA',W/2-190,348,16,'#8ff4ff');text(currentPhase===1?(cityUnlocked?'FASE 2 DESBLOQUEADA!':'A próxima aventura está chegando...'):'FASE 2 CONCLUÍDA!',W/2-190,382,14,'#ffe66b');text('Use os botões para continuar',W/2-170,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=4800;goalX=4635;reset();beginGame();}
