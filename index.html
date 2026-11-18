@@ -102,9 +102,9 @@ function playTone(freq=520,duration=.09){
   osc.start();osc.stop(audioCtx.currentTime+duration);
  }catch(_){}
 }
-const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100}];
-const discs=[{x:360,y:400,taken:false},{x:1450,y:355,taken:false},{x:2670,y:400,taken:false}];
-const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1120,y:368,w:66,h:42},{x:1840,y:413,w:66,h:42},{x:2300,y:378,w:66,h:42}];
+const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100},{x:3070,y:420,w:260,h:135},{x:3410,y:455,w:360,h:100},{x:3850,y:405,w:300,h:150},{x:4210,y:455,w:300,h:100}];
+const discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,y:355,taken:false}];
+const jokeHazards=[{x:650,y:413,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1}];
 function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5'}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
@@ -194,13 +194,13 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
- jokeHazards.forEach(h=>{if(h.stunned>0)h.stunned--});
+ jokeHazards.forEach(h=>{if(h.stunned>0){h.stunned--;}else if(h.speed){h.x+=h.speed*h.dir;if(h.x<=h.minX){h.x=h.minX;h.dir=1}else if(h.x>=h.maxX){h.x=h.maxX;h.dir=-1}}});
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
  const targetH=player.crouching?player.crouchH:player.standH;
  if(targetH!==player.h){const feet=player.y+player.h;player.h=targetH;player.y=feet-player.h}
  if(player.crouching){if(keys.left){player.vx=-1.8;player.dir=-1}else if(keys.right){player.vx=1.8;player.dir=1}else player.vx*=.65}else if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
- player.x+=player.vx;player.x=Math.max(0,Math.min(2860,player.x));
+ player.x+=player.vx;player.x=Math.max(0,Math.min(4440,player.x));
  player.vy+=.48;player.y+=player.vy;collide();
  if(player.y>H+40){lives--;player.x=Math.max(40,player.x-150);player.y=330;player.vy=0;focus=100;if(lives<=0)gameOver=true;updateHud()}
  hitHazard();
@@ -215,8 +215,8 @@ function update(){
   return s.life>0;
  });
  particles=particles.filter(p=>{p.t++;if(p.vx){p.x+=p.vx;p.y+=p.vy;p.vy+=.08}return p.t<35});
- if(player.x>2780&&cds===3)won=true;
- cam=Math.max(0,Math.min(2040,player.x-330));
+ if(player.x>4300&&cds===3)won=true;
+ cam=Math.max(0,Math.min(4110,player.x-330));
 }
 function draw(){
  // Fundo fixo: cobre todo o canvas mesmo quando a câmera aproxima a cena.
@@ -230,7 +230,7 @@ function draw(){
  shots.forEach(drawShot);
  if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
- if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
+ if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}\n if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
  ctx.restore();
  if(won||gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text(won?'PUTOVERSO SALVO!':'FIM DE JOGO',W/2-175,220,32,'#ffe65c');text(won?'A Alpaca recuperou as 3 musgas!':'Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
