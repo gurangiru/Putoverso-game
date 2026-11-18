@@ -208,6 +208,23 @@ function drawShield(x,y,anim){
  for(let i=0;i<8;i++){const a=anim*.035+i*Math.PI/4;const r=39+pulse;ctx.fillStyle=i%2?'#ff65d4':'#ffe66b';ctx.fillRect(Math.cos(a)*r-2,Math.sin(a)*r-2,5,5)}
  ctx.restore();
 }
+function drawWater(){
+ // Água decorativa sob o trajeto: a queda continua tendo a mesma consequência.
+ const left=cam-120,right=cam+W+120,top=492;
+ const water=ctx.createLinearGradient(0,top,0,850);
+ water.addColorStop(0,'#39c9ee');water.addColorStop(.35,'#168fc9');water.addColorStop(1,'#14518f');
+ ctx.fillStyle=water;ctx.fillRect(left,top,right-left,900-top);
+ // Faixa de espuma e pequenas ondas em pixel art.
+ for(let x=Math.floor(left/42)*42;x<right;x+=42){
+  const bob=Math.sin(frame*.075+x*.025)*4;
+  rect(x,top+bob,24,4,'#a7f5ff');
+  rect(x+12,top+4+bob,19,3,'#5ce4f5');
+  if((Math.floor(x/42)+frame)%5===0){
+   rect(x+27,top+24+bob,4,4,'#c8fbff');
+   rect(x+31,top+34+bob,3,3,'#75efff');
+  }
+ }
+}
 function drawPlatforms(){
  for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;rect(x,p.y,p.w,p.h,'#8b4b29');rect(x,p.y,p.w,12,'#43c95e');rect(x,p.y+10,p.w,7,'#a5f05b');
  for(let xx=x+8;xx<x+p.w-8;xx+=34){rect(xx,p.y+24,15,8,'#b96a38');rect(xx+12,p.y+55,14,9,'#6e3b31');rect(xx+2,p.y+78,8,7,'#d18a48')}
@@ -290,7 +307,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawPlatforms();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawWater();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':(p.glyph||'♫'),p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':(p.kind==='music'?['#fff06a','#ff65cb','#62f7ff'][p.t%3]:'#fff06a'))});
