@@ -132,16 +132,20 @@ function alpaca(x,y,anim=0,dir=1,attack=0,moving=false,airborne=false){
  rect(4,23,27,21,'#16c9d7');rect(3,27,10,13,'#ff4db8');rect(12,23,10,12,'#ffcf32');rect(20,29,12,12,'#7955ef');rect(9,36,12,8,'#31df77');
  // tail
  rect(0,27,7,9,'#ff55b8');rect(0,34,7,7,'#ffd52e');
+ // Cabeça, topete e fones acompanham o ritmo sem deslocar o rosto.
+ const headBob=moving?Math.sin(anim*.55)*1.35:(airborne?Math.sin(anim*.22)*.8:0);
+ const lockLift=moving?Math.sin(anim*.55)*2.2:(airborne?-1.5:0);
  // head
- rect(5,5,25,24,'#ffe0bd');rect(3,9,8,18,'#ffbd91');rect(7,1,7,10,'#ffb6a8');rect(23,0,7,12,'#ffb6a8');rect(8,0,5,6,'#fff0d9');rect(24,0,5,7,'#fff0d9');
- // rainbow forelock
- rect(7,2,22,7,'#ff3ca6');rect(10,0,8,8,'#ffae24');rect(17,1,8,7,'#ffe83d');rect(23,4,7,7,'#31d5ff');
+ rect(5,5+headBob,25,24,'#ffe0bd');rect(3,9+headBob,8,18,'#ffbd91');rect(7,1+headBob,7,10,'#ffb6a8');rect(23,headBob,7,12,'#ffb6a8');rect(8,headBob,5,6,'#fff0d9');rect(24,headBob,5,7,'#fff0d9');
+ // rainbow forelock: pequenas mechas saltitam durante a corrida.
+ rect(7,2+headBob+lockLift*.35,22,7,'#ff3ca6');rect(10,lockLift,8,8,'#ffae24');rect(17,1+lockLift*.8,8,7,'#ffe83d');rect(23,4+headBob+lockLift*.45,7,7,'#31d5ff');
  // muzzle and smile
  rect(19,17,11,8,'#fff0d7');rect(25,19,3,3,'#47204b');rect(21,23,6,2,'#d64a85');
  // sunglasses
  rect(8,11,10,7,'#20143d');rect(20,11,10,7,'#20143d');rect(17,13,4,2,'#ff4fc8');rect(10,12,6,4,'#40dfff');rect(22,12,6,4,'#40dfff');
  // headphones and jacket
- rect(1,10,6,14,'#18152e');rect(0,13,7,8,'#3b2a72');rect(2,15,4,4,'#ffd43b');
+ rect(1,10+headBob,6,14,'#18152e');rect(0,13+headBob,7,8,'#3b2a72');rect(2,15+headBob,4,4,'#ffd43b');
+ rect(26,7+headBob,7,13,'#18152e');rect(27,10+headBob,7,8,'#3b2a72');rect(29,12+headBob,4,4,'#ffd43b');
  rect(7,29,20,12,'#17162c');rect(14,31,6,7,'#ffd43b');rect(11,29,2,4,'#ff4fc8');
  if(attack>0){ctx.fillStyle='#58edff';ctx.fillRect(31,22,5,5);ctx.fillStyle='#ff55d8';ctx.fillRect(34,18,4,4)}
  ctx.restore();
@@ -277,7 +281,7 @@ function draw(){
  drawBackground();drawScenery();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
- particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
+ particles.forEach(p=>{text(p.kind==='ha'?'HA!':(p.glyph||'♫'),p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':(p.kind==='music'?['#fff06a','#ff65cb','#62f7ff'][p.t%3]:'#fff06a'))});
  if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
  if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
  ctx.restore();
@@ -285,7 +289,11 @@ function draw(){
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
-function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
+function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});
+ // Três notinhas coloridas acompanham cada disparo da Onda Sonora.
+ const nx=player.x+(player.dir>0?31:3),ny=player.y+19;
+ ['♪','♫','♬'].forEach((glyph,i)=>particles.push({x:nx,y:ny+(i-1)*8,t:0,kind:'music',glyph,vx:player.dir*(1.1+i*.35),vy:-1.8-i*.35}));
+}
 function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();beginGame();}}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
