@@ -146,6 +146,28 @@ function drawBackground(){
  // rainbow
  ctx.lineWidth=12;['#ff5d9e','#ffb52e','#fff05a','#55df80','#39caff','#8a66ff'].forEach((col,i)=>{ctx.strokeStyle=col;ctx.beginPath();ctx.arc(760-cam*.08,210,95-i*11,Math.PI,Math.PI*2);ctx.stroke()});
 }
+function drawScenery(){
+ // Árvores e flores posicionadas no mundo: acompanham a câmera e dão vida ao campo.
+ const trees=[170,780,1450,2750,3650];
+ for(let i=0;i<trees.length;i++){
+  const x=trees[i]-cam;if(x<-90||x>W+90)continue;
+  const sway=Math.sin(frame*.025+i)*2;
+  rect(x-4,414,9,42,'#8b4b35');
+  rect(x-28+sway,382,24,27,'#35a95d');
+  rect(x-10+sway,367,29,34,'#49c96c');
+  rect(x+8+sway,385,23,24,'#238e58');
+  rect(x-17+sway,378,7,7,'#9af078');
+ }
+ for(let i=0;i<34;i++){
+  const wx=65+i*126+(i%3)*19,x=wx-cam;
+  if(x<-15||x>W+15)continue;
+  const y=447+(i%2)*2, bob=Math.sin(frame*.07+i)*1.5;
+  rect(x,y+3,3,7,'#279b55');
+  rect(x-4,y+1+bob,4,4,['#ff69b4','#ffe45b','#67dfff'][i%3]);
+  rect(x+3,y-1+bob,4,4,['#ffe45b','#b68cff','#ff83c8'][i%3]);
+  rect(x-1,y-3+bob,4,4,'#fff4a6');
+ }
+}
 function drawPlatforms(){
  for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;rect(x,p.y,p.w,p.h,'#8b4b29');rect(x,p.y,p.w,12,'#43c95e');rect(x,p.y+10,p.w,7,'#a5f05b');
  for(let xx=x+8;xx<x+p.w-8;xx+=34){rect(xx,p.y+24,15,8,'#b96a38');rect(xx+12,p.y+55,14,9,'#6e3b31');rect(xx+2,p.y+78,8,7,'#d18a48')}
@@ -226,7 +248,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawPlatforms();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
