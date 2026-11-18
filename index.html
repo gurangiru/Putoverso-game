@@ -309,6 +309,38 @@ function drawPlatformDetails(){
   }
  }
 }
+function drawAmbientEffects(){
+ // Pontinhos luminosos em posições fixas do mundo: piscam suavemente sem usar aleatoriedade.
+ const motes=[
+  [150,330,'#fff1a6'],[390,300,'#b8f7ff'],[590,350,'#ffe58a'],[860,285,'#ffc8f0'],
+  [1120,320,'#b8f7ff'],[1390,285,'#fff1a6'],[1690,345,'#ffc8f0'],[1980,300,'#b8f7ff'],
+  [2240,325,'#ffe58a'],[2570,285,'#ffc8f0'],[2860,340,'#b8f7ff'],[3150,295,'#fff1a6'],
+  [3470,330,'#ffc8f0'],[3740,280,'#b8f7ff'],[4050,325,'#ffe58a'],[4320,295,'#ffc8f0']
+ ];
+ motes.forEach((m,i)=>{
+  const x=m[0]-cam*.82;
+  if(x<-12||x>W+12)return;
+  const pulse=(Math.sin(frame*.075+i*2.1)+1)/2;
+  const y=m[1]+Math.sin(frame*.035+i)*5;
+  const size=pulse>.82?4:2;
+  ctx.save();ctx.globalAlpha=.28+pulse*.62;
+  ctx.shadowColor=m[2];ctx.shadowBlur=5+pulse*8;
+  ctx.fillStyle=m[2];ctx.fillRect(Math.round(x),Math.round(y),size,size);
+  if(pulse>.68){ctx.fillRect(Math.round(x+size/2),Math.round(y-3),2,size+6);ctx.fillRect(Math.round(x-3),Math.round(y+size/2),size+6,2)}
+  ctx.restore();
+ });
+ // Vagalumes aparecem perto da grama em pequenos grupos espaçados.
+ const fireflies=[260,720,1180,1510,2070,2440,2910,3330,3680,4170];
+ fireflies.forEach((wx,i)=>{
+  const x=wx-cam;if(x<-10||x>W+10)return;
+  const bob=Math.sin(frame*.06+i*1.8)*7;
+  const blink=(Math.sin(frame*.11+i*2.4)+1)/2;
+  ctx.save();ctx.globalAlpha=.2+blink*.75;
+  ctx.shadowColor='#baff72';ctx.shadowBlur=5+blink*9;
+  ctx.fillStyle='#eaff9b';ctx.fillRect(Math.round(x),Math.round(385+bob),3,3);
+  ctx.restore();
+ });
+}
 function drawDisc(d){let x=d.x-cam;if(x<-30||x>W+30||d.taken)return;ctx.save();ctx.translate(x,d.y+Math.sin(frame*.08)*4);ctx.fillStyle='#ffeb65';ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f6a6ff';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5131a0';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-8,-7,5,2);ctx.restore()}
 function drawLaughHorse(x,y,faceDir=1,stunned=0){
  const bob=stunned>0?0:Math.sin(frame*.18)*2;
@@ -389,7 +421,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawAmbientEffects();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
