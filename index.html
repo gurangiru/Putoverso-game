@@ -86,7 +86,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
 const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus'),ammo:document.getElementById('ammo'),shield:document.getElementById('shield'),checkpoint:document.getElementById('checkpoint')};
-let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,shieldTimer=0,shieldCooldown=0,started=false,soundEnabled=true,audioCtx=null,checkpointActive=false,checkpointX=70,checkpointY=370;
+let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,shieldTimer=0,shieldCooldown=0,started=false,soundEnabled=true,audioCtx=null,checkpointActive=false,checkpointX=70,checkpointY=370,victoryTimer=0;
 const flowerTriggers=new Set();
 const held={crouch:false};
 const menuScreen=document.getElementById('menuScreen');
@@ -106,7 +106,7 @@ function playTone(freq=520,duration=.09){
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100},{x:3070,y:420,w:260,h:135},{x:3410,y:455,w:360,h:100},{x:3775,y:435,w:65,h:105},{x:3850,y:405,w:300,h:150},{x:4155,y:430,w:65,h:110},{x:4210,y:455,w:300,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,y:355,taken:false}];
 const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1},{kind:'note',x:4170,y:365,w:34,h:42,minY:345,maxY:395,speedY:1.15,dirY:1}];
-function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
+function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;victoryTimer=0;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5';ui.shield.textContent=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');ui.checkpoint.textContent=checkpointActive?'ATIVADO':'INÍCIO'}
 function respawnAtCheckpoint(){player.x=checkpointX;player.y=checkpointY;player.vx=0;player.vy=0;player.inv=90;focus=100;}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
@@ -492,6 +492,7 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
+ if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90)won=true;return;}
  updateGroundBirds();
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
  const shieldLabel=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');if(ui.shield.textContent!==shieldLabel)ui.shield.textContent=shieldLabel;
@@ -532,7 +533,7 @@ function update(){
   return s.life>0;
  });
  particles=particles.filter(p=>{p.t++;if(p.vx){p.x+=p.vx;p.y+=p.vy;p.vy+=.08}return p.t<(p.life||35)});
- if(player.x>4300&&cds===3)won=true;
+ if(cds===3&&player.x+player.w/2>=4335&&victoryTimer===0){victoryTimer=1;player.vx=0;playTone(880,.22);playTone(1180,.3);}
  cam=Math.max(0,Math.min(4110,player.x-330));
 }
 function draw(){
@@ -561,8 +562,18 @@ function draw(){
  if(checkpointActive||2160-cam>0&&2160-cam<W){const flagX=2160-cam;rect(flagX,365,5,55,'#784629');rect(flagX+5,367,30,17,checkpointActive?'#ffe45b':'#b9a6d8');text(checkpointActive?'OK':'★',flagX+9,380,11,'#54247b')}
  if(3880-cam>0&&3880-cam<W){rect(3880-cam,350,6,55,'#784629');rect(3848-cam,337,70,25,'#ff8bd5');text('DESAFIO!',3850-cam,355,10,'#54247b')}
  if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
+ // Portal de saída: permanece adormecido até os três CDs serem recuperados.
+ {const px=4335-cam,py=400,active=cds===3,pulse=Math.sin(frame*.09),r=active?39+pulse*3:32;
+  ctx.save();ctx.translate(px,py);ctx.globalAlpha=active?1:.58;
+  ctx.shadowColor=active?'#ff65e8':'#8e83b8';ctx.shadowBlur=active?24:7;
+  ctx.strokeStyle=active?'#ffe66b':'#8d83ad';ctx.lineWidth=7;ctx.beginPath();ctx.ellipse(0,0,r,r*1.35,0,0,Math.PI*2);ctx.stroke();
+  ctx.shadowBlur=0;ctx.strokeStyle=active?'#62f3ff':'#b1a8c8';ctx.lineWidth=3;ctx.beginPath();ctx.ellipse(0,0,r-9,(r-9)*1.35,frame*.025,0,Math.PI*2);ctx.stroke();
+  ctx.fillStyle=active?'rgba(198,91,255,.42)':'rgba(80,70,120,.28)';ctx.beginPath();ctx.ellipse(0,0,r-11,(r-11)*1.35,0,0,Math.PI*2);ctx.fill();
+  if(active){for(let i=0;i<7;i++){const a=frame*.045+i*Math.PI*2/7;ctx.fillStyle=i%2?'#ff8bd5':'#fff39a';ctx.fillRect(Math.cos(a)*(r+5)-2,Math.sin(a)*(r*1.25)-2,5,5)}text('ENTRAR',-34,58,11,'#fff39a')}else{text('3 CDs',-25,58,12,'#e4dcff')}
+  ctx.restore();}
+ if(victoryTimer>0){ctx.save();ctx.globalAlpha=Math.min(1,victoryTimer/25);ctx.fillStyle='#fff2a8';ctx.font='bold 18px monospace';ctx.fillText('✦',4300-cam,325);ctx.fillText('✦',4370-cam,315);ctx.restore();}
  ctx.restore();
- if(won||gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text(won?'PUTOVERSO SALVO!':'FIM DE JOGO',W/2-175,220,32,'#ffe65c');text(won?'A Alpaca recuperou as 3 musgas!':'Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
+ if(won){ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text('CAMPOS DA DESARMONIA',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text('PRÓXIMA AVENTURA',W/2-135,310,15,'#ffe66b');text('CIDADE DO DUPLO SENTIDO',W/2-190,348,18,'#8ff4ff');text('Aperte R para jogar novamente',W/2-190,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
