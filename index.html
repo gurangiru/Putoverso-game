@@ -49,6 +49,10 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 .menu-tag{display:inline-block;margin:4px;padding:6px 9px;border:1px solid #a78bfa;border-radius:8px;background:#25134b;color:#fff;font-size:11px}
 .play-button{margin-top:12px;border:3px solid #fff19a;border-radius:12px;padding:12px 28px;background:linear-gradient(#ff69c9,#c02691);color:#fff;font:bold 20px monospace;box-shadow:0 5px #6c1c67;cursor:pointer}
 .play-button:active{transform:translateY(4px);box-shadow:0 1px #6c1c67}
+.start-top{border:2px solid #fff19a;background:linear-gradient(#ff69c9,#c02691);color:#fff;border-radius:9px;padding:8px 12px;font:bold 12px monospace;box-shadow:0 3px #6c1c67;cursor:pointer}
+.start-top:active{transform:translateY(2px);box-shadow:0 1px #6c1c67}
+.start-top[hidden]{display:none}
+@media(max-width:700px){.start-top{padding:7px 8px;font-size:10px}}
 .sound-toggle{border:2px solid #7cf1ff;background:#17476b;color:#fff;border-radius:9px;padding:8px 10px;font:bold 12px monospace;box-shadow:0 3px #180b32;cursor:pointer}
 @media(max-width:700px){.sound-toggle{padding:7px 8px;font-size:10px}}
 @media(orientation:landscape) and (max-height:500px){
@@ -63,7 +67,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><div class="pill">♫ Ondas: <b id="ammo">5/5</b></div><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><div class="pill">♫ Ondas: <b id="ammo">5/5</b></div><button class="start-top" id="startTop" type="button">▶ START</button><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
 <div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas>
 <div class="menu-screen" id="menuScreen"><div class="menu-panel">
 <div class="menu-title">PUTOVERSO</div>
@@ -186,8 +190,7 @@ function collide(){
  for(const p of platforms){if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+18&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}
 }
 function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
-function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
-function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
+function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}\nfunction burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
  jokeHazards.forEach(h=>{if(h.stunned>0)h.stunned--});
@@ -233,12 +236,17 @@ function draw(){
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});}
-function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();started=true;menuScreen.hidden=true;}}
+function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();beginGame();}}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='attack')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
-document.getElementById('restart').addEventListener('click',()=>{reset();started=true;menuScreen.hidden=true;});
-document.getElementById('playButton').addEventListener('click',()=>{started=true;menuScreen.hidden=true;playTone(660,.12);});
+const startTop=document.getElementById('startTop');
+function beginGame(){
+ started=true;menuScreen.hidden=true;startTop.hidden=true;playTone(660,.12);
+}
+startTop.addEventListener('click',beginGame);
+document.getElementById('playButton').addEventListener('click',beginGame);
+document.getElementById('restart').addEventListener('click',()=>{reset();beginGame();});
 const soundToggle=document.getElementById('soundToggle');
 soundToggle.addEventListener('click',()=>{
  soundEnabled=!soundEnabled;
