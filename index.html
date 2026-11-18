@@ -148,7 +148,7 @@ function drawBackground(){
 }
 function drawScenery(){
  // Árvores e flores posicionadas no mundo: acompanham a câmera e dão vida ao campo.
- const trees=[170,780,1450,2750,3650];
+ const trees=[100,170,430,780,980,1250,1450,1740,2050,2470,2750,2960,3320,3650,3900,4140];
  for(let i=0;i<trees.length;i++){
   const x=trees[i]-cam;if(x<-90||x>W+90)continue;
   const sway=Math.sin(frame*.025+i)*2;
