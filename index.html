@@ -230,7 +230,8 @@ function draw(){
  shots.forEach(drawShot);
  if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':'♫',p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':'#fff06a')});
- if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}\n if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
+ if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
+ if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
  ctx.restore();
  if(won||gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text(won?'PUTOVERSO SALVO!':'FIM DE JOGO',W/2-175,220,32,'#ffe65c');text(won?'A Alpaca recuperou as 3 musgas!':'Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
