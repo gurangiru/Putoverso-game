@@ -559,7 +559,7 @@ function update(){
  });
  particles=particles.filter(p=>{p.t++;if(p.vx){p.x+=p.vx;p.y+=p.vy;p.vy+=.08}return p.t<(p.life||35)});
  if(cds===3&&player.x+player.w/2>=goalX&&victoryTimer===0){victoryTimer=1;player.vx=0;playTone(880,.22);playTone(1180,.3);}
- cam=Math.max(0,Math.min(worldWidth-W/zoom,player.x-330));
+ cam=Math.max(0,Math.min(worldWidth-W/1.28,player.x-330));
 }
 function draw(){
  // Fundo fixo: cobre todo o canvas mesmo quando a câmera aproxima a cena.
