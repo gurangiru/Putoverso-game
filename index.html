@@ -150,13 +150,30 @@ function drawScenery(){
  // Árvores e flores posicionadas no mundo: acompanham a câmera e dão vida ao campo.
  const trees=[100,170,430,780,980,1250,1450,1740,2050,2470,2750,2960,3320,3650,3900,4140];
  for(let i=0;i<trees.length;i++){
-  const x=trees[i]-cam;if(x<-90||x>W+90)continue;
+  const x=trees[i]-cam;if(x<-100||x>W+100)continue;
   const sway=Math.sin(frame*.025+i)*2;
-  rect(x-4,414,9,42,'#8b4b35');
-  rect(x-28+sway,382,24,27,'#35a95d');
-  rect(x-10+sway,367,29,34,'#49c96c');
-  rect(x+8+sway,385,23,24,'#238e58');
-  rect(x-17+sway,378,7,7,'#9af078');
+  const type=i%3;
+  // Troncos com pequenas diferenças de largura e copa em três silhuetas.
+  if(type===0){
+   rect(x-4,414,9,42,'#8b4b35');
+   rect(x-29+sway,383,25,25,'#35a95d');
+   rect(x-14+sway,366,31,37,'#49c96c');
+   rect(x+8+sway,382,25,27,'#238e58');
+   rect(x-20+sway,376,9,8,'#9af078');
+  }else if(type===1){
+   rect(x-5,410,11,46,'#8b4b35');
+   rect(x-23+sway,388,46,22,'#238e58');
+   rect(x-18+sway,371,36,23,'#35a95d');
+   rect(x-12+sway,354,24,24,'#49c96c');
+   rect(x-5+sway,363,8,7,'#b0f477');
+  }else{
+   rect(x-3,416,7,40,'#8b4b35');
+   rect(x-34+sway,390,25,22,'#238e58');
+   rect(x-18+sway,374,28,31,'#49c96c');
+   rect(x+3+sway,388,27,23,'#35a95d');
+   rect(x-9+sway,365,17,17,'#67d978');
+   rect(x+10+sway,380,8,7,'#b0f477');
+  }
  }
  for(let i=0;i<34;i++){
   const wx=65+i*126+(i%3)*19,x=wx-cam;
