@@ -106,7 +106,7 @@ function playTone(freq=520,duration=.09){
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100},{x:3070,y:420,w:260,h:135},{x:3410,y:455,w:360,h:100},{x:3850,y:405,w:300,h:150},{x:4210,y:455,w:300,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,y:355,taken:false}];
 const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1}];
-function reset(){shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
+function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5';ui.shield.textContent=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO')}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function text(t,x,y,size=18,color='#fff'){ctx.font=`bold ${size}px monospace`;ctx.fillStyle='#241044';ctx.fillText(t,x+2,y+2);ctx.fillStyle=color;ctx.fillText(t,x,y)}
@@ -190,6 +190,52 @@ function drawFlyingCreatures(){
   const y=125+(i%3)*34+Math.sin(frame*.035+i)*5;
   ctx.strokeStyle=i%2?'#fff8dc':'#fff';
   ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x-8,y+3);ctx.quadraticCurveTo(x-3,y-4-Math.sin(frame*.16+i)*3,x,y+2);ctx.quadraticCurveTo(x+4,y-4-Math.sin(frame*.16+i)*3,x+9,y+3);ctx.stroke();
+ }
+}
+const birdFlocks=[
+ {x:1378,y:400,cooldown:0,birds:[-22,0,22].map((dx,i)=>({homeX:1378+dx,homeY:400,phase:i*1.7}))},
+ {x:2615,y:445,cooldown:0,birds:[-25,0,25,48].map((dx,i)=>({homeX:2615+dx,homeY:445,phase:i*1.4}))},
+ {x:3460,y:445,cooldown:0,birds:[-20,4,28].map((dx,i)=>({homeX:3460+dx,homeY:445,phase:i*1.9}))}
+];
+function resetGroundBirds(){
+ birdFlocks.forEach(f=>{f.cooldown=0;f.birds.forEach(b=>{b.x=b.homeX;b.y=b.homeY;b.vx=0;b.vy=0;b.life=0;b.flown=false})});
+}
+function updateGroundBirds(){
+ for(const flock of birdFlocks){
+  if(flock.cooldown>0)flock.cooldown--;
+  flock.birds.forEach(b=>{
+   if(!b.flown)return;
+   b.x+=b.vx;b.y+=b.vy;b.vy+=.035;b.life++;
+   if(b.life>118||b.x<cam-140||b.x>cam+W+140){
+    b.x=b.homeX;b.y=b.homeY;b.vx=0;b.vy=0;b.life=0;b.flown=false;
+   }
+  });
+  if(flock.cooldown<=0&&flock.birds.every(b=>!b.flown)){
+   const center=flock.x+10;
+   const samePlatform=player.y+player.h>=flock.y-48&&player.y+player.h<=flock.y+38;
+   if(samePlatform&&player.x+player.w>flock.x-58&&player.x<flock.x+70){
+    const away=player.x+player.w/2<center?1:-1;
+    flock.birds.forEach((b,i)=>{
+     b.flown=true;b.life=0;b.vx=away*(1.45+(i%3)*.55);b.vy=-2.1-(i%3)*.45;
+    });
+    flock.cooldown=300;
+    playTone(880,.045);
+   }
+  }
+ }
+}
+function drawGroundBirds(){
+ for(const flock of birdFlocks)for(const b of flock.birds){
+  const x=b.x-cam;if(x<-20||x>W+20)continue;
+  const flap=b.flown?Math.sin(frame*.65+b.phase)*4:Math.sin(frame*.12+b.phase)*1.2;
+  ctx.save();ctx.translate(Math.round(x),Math.round(b.y));
+  // Passarinhos em pixel art, com barriga clara, bico e asas animadas.
+  rect(-6,-3,13,7,'#49365f');rect(-3,1,8,3,'#fff0c9');
+  rect(4,-2,5,3,'#ffd65a');rect(2,-5,2,2,'#fff');
+  rect(-2,-6-flap,7,4,b.flown?'#ff83c8':'#8a70d6');
+  rect(-8,0,4,3,'#6a4b9b');
+  if(!b.flown){rect(-4,5,2,3,'#d98a45');rect(2,5,2,3,'#d98a45')}
+  ctx.restore();
  }
 }
 function drawScenery(){
@@ -400,6 +446,7 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
+ updateGroundBirds();
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
  const shieldLabel=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');if(ui.shield.textContent!==shieldLabel)ui.shield.textContent=shieldLabel;
  jokeHazards.forEach(h=>{if(h.stunned>0){h.stunned--;}else if(h.speed){h.x+=h.speed*h.dir;if(h.x<=h.minX){h.x=h.minX;h.dir=1}else if(h.x>=h.maxX){h.x=h.maxX;h.dir=-1}}});
@@ -448,7 +495,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawAmbientEffects();drawBreeze();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawGroundBirds();drawAmbientEffects();drawBreeze();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
