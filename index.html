@@ -280,6 +280,35 @@ function drawPlatforms(){
  for(let xx=x+20;xx<x+p.w;xx+=80){rect(xx,p.y-7,4,7,'#fff07a');rect(xx+5,p.y-5,4,5,'#ff7ec8')}
  }
 }
+function drawPlatformDetails(){
+ // Pequenos detalhes decorativos acompanham o chão sem alterar colisões ou plataformas.
+ for(let pi=0;pi<platforms.length;pi++){
+  const p=platforms[pi];
+  for(let n=0,wx=p.x+48;wx<p.x+p.w-22;wx+=112,n++){
+   if(discs.some(d=>Math.abs(d.x-wx)<42)||jokeHazards.some(h=>Math.abs((h.x+33)-wx)<48))continue;
+   const x=wx-cam;if(x<-25||x>W+25)continue;
+   const y=p.y-2,kind=(pi+n)%3,sway=Math.sin(frame*.055+pi*2+n)*2;
+   if(kind===0){
+    // Touceira de grama com folhas balançando.
+    ctx.save();ctx.translate(x,y);
+    ctx.strokeStyle='#249b54';ctx.lineWidth=3;ctx.beginPath();
+    ctx.moveTo(0,1);ctx.quadraticCurveTo(-5,-7+sway,-8,-11+sway);
+    ctx.moveTo(1,1);ctx.quadraticCurveTo(2,-8-sway,5,-13-sway);
+    ctx.moveTo(2,1);ctx.quadraticCurveTo(8,-5+sway,11,-9+sway);ctx.stroke();
+    rect(-2,-2,5,3,'#a4ed63');ctx.restore();
+   }else if(kind===1){
+    // Cogumelo pequeno em tons de rosa e dourado.
+    rect(x-2,y-9,7,8,'#fff0c9');rect(x-5,y-12,13,5,'#e94fae');
+    rect(x-3,y-14,9,3,'#ff8bc9');rect(x-2,y-8,2,2,'#a84a9b');
+    rect(x+2,y-11,2,2,'#fff5a8');
+   }else{
+    // Pedrinhas claras com sombra pixelada.
+    rect(x-7,y-4,13,5,'#8a9ca1');rect(x-4,y-7,8,4,'#c8dadd');
+    rect(x+4,y-3,5,4,'#71878e');rect(x-5,y+1,12,2,'#75462f');
+   }
+  }
+ }
+}
 function drawDisc(d){let x=d.x-cam;if(x<-30||x>W+30||d.taken)return;ctx.save();ctx.translate(x,d.y+Math.sin(frame*.08)*4);ctx.fillStyle='#ffeb65';ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f6a6ff';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5131a0';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-8,-7,5,2);ctx.restore()}
 function drawLaughHorse(x,y,faceDir=1,stunned=0){
  const bob=stunned>0?0:Math.sin(frame*.18)*2;
@@ -360,7 +389,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
