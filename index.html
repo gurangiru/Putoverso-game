@@ -257,6 +257,7 @@ function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',v
 function update(){
  frame++;if(!started||gameOver||won)return;
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
+ const shieldLabel=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');if(ui.shield.textContent!==shieldLabel)ui.shield.textContent=shieldLabel;
  jokeHazards.forEach(h=>{if(h.stunned>0){h.stunned--;}else if(h.speed){h.x+=h.speed*h.dir;if(h.x<=h.minX){h.x=h.minX;h.dir=1}else if(h.x>=h.maxX){h.x=h.maxX;h.dir=-1}}});
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
