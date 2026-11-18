@@ -86,7 +86,8 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
 const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus'),ammo:document.getElementById('ammo'),shield:document.getElementById('shield'),checkpoint:document.getElementById('checkpoint')};
-let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,shieldTimer=0,shieldCooldown=0,started=false,soundEnabled=true,audioCtx=null,checkpointActive=false,checkpointX=70,checkpointY=370,victoryTimer=0;
+let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,shieldTimer=0,shieldCooldown=0,started=false,soundEnabled=true,audioCtx=null,checkpointActive=false,checkpointX=70,checkpointY=370,victoryTimer=0,cityUnlocked=false;
+try{cityUnlocked=localStorage.getItem('putoverso_city_unlocked')==='yes'}catch(_){}
 const flowerTriggers=new Set();
 const held={crouch:false};
 const menuScreen=document.getElementById('menuScreen');
@@ -492,7 +493,7 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
- if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90)won=true;return;}
+ if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90){won=true;cityUnlocked=true;try{localStorage.setItem('putoverso_city_unlocked','yes')}catch(_){}}return;}
  updateGroundBirds();
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
  const shieldLabel=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');if(ui.shield.textContent!==shieldLabel)ui.shield.textContent=shieldLabel;
@@ -573,7 +574,7 @@ function draw(){
   ctx.restore();}
  if(victoryTimer>0){ctx.save();ctx.globalAlpha=Math.min(1,victoryTimer/25);ctx.fillStyle='#fff2a8';ctx.font='bold 18px monospace';ctx.fillText('✦',4300-cam,325);ctx.fillText('✦',4370-cam,315);ctx.restore();}
  ctx.restore();
- if(won){ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text('CAMPOS DA DESARMONIA',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text('PRÓXIMA AVENTURA',W/2-135,310,15,'#ffe66b');text('CIDADE DO DUPLO SENTIDO',W/2-190,348,18,'#8ff4ff');text('Aperte R para jogar novamente',W/2-190,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
+ if(won){ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text('CAMPOS DA DESARMONIA',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text('PRÓXIMA AVENTURA',W/2-135,310,15,'#ffe66b');text('CIDADE DO DUPLO SENTIDO',W/2-190,348,18,'#8ff4ff');text(cityUnlocked?'FASE 2 DESBLOQUEADA!':'A próxima aventura está chegando...',W/2-190,382,14,cityUnlocked?'#ffe66b':'#fff');text('Aperte R para rejogar esta fase',W/2-190,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
