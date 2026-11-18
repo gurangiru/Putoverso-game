@@ -321,6 +321,42 @@ function drawWater(){
   rect(fx+(dir>0?10:1),fy+1,2,2,'#23456d');
  }
 }
+function drawDragonflies(){
+ // Libélulas luminosas patrulham a beirada da água em trajetórias suaves.
+ const dragonflies=[
+  {x:185,phase:0,c:'#63f4ff',wing:'#d7ffff'},
+  {x:575,phase:1.1,c:'#a88aff',wing:'#eee2ff'},
+  {x:1015,phase:2.2,c:'#58e8d0',wing:'#d3fff4'},
+  {x:1485,phase:3.1,c:'#ff8bd5',wing:'#ffe0f4'},
+  {x:1945,phase:4.2,c:'#68dcff',wing:'#d9f8ff'},
+  {x:2445,phase:5.1,c:'#b6f06a',wing:'#efffcf'},
+  {x:2945,phase:6.2,c:'#9d8bff',wing:'#e7e0ff'},
+  {x:3465,phase:7.1,c:'#55e9e8',wing:'#d8ffff'},
+  {x:3975,phase:8.2,c:'#ff9bcb',wing:'#ffe5f2'},
+  {x:4315,phase:9.1,c:'#8eeaff',wing:'#e2fbff'}
+ ];
+ dragonflies.forEach((d,i)=>{
+  const drift=Math.sin(frame*.018+d.phase)*25;
+  const x=d.x+drift-cam;
+  if(x<-35||x>W+35)return;
+  const y=478+Math.sin(frame*.035+d.phase*1.6)*7;
+  const flap=Math.sin(frame*.42+d.phase)*5;
+  const glow=.55+Math.sin(frame*.07+d.phase)*.2;
+  ctx.save();ctx.translate(Math.round(x),Math.round(y));
+  ctx.globalAlpha=glow;ctx.shadowColor=d.c;ctx.shadowBlur=10;
+  ctx.fillStyle=d.c;ctx.beginPath();ctx.arc(0,0,5,0,Math.PI*2);ctx.fill();
+  ctx.shadowBlur=0;
+  // Corpo fino, cauda segmentada e quatro asas translúcidas em movimento.
+  rect(-2,-2,5,4,d.c);rect(2,-1,5,2,'#314c78');rect(6,0,4,2,d.c);
+  rect(9,0,3,2,'#fff1a8');
+  ctx.save();ctx.globalAlpha=.58;
+  rect(-4,-7-flap,8,3,d.wing);rect(1,-10+flap*.35,8,3,d.wing);
+  rect(-4,4+flap,8,3,d.wing);rect(1,7-flap*.35,8,3,d.wing);
+  ctx.restore();
+  ctx.fillStyle='#fff';ctx.fillRect(-2,-2,2,2);
+  ctx.restore();
+ });
+}
 function drawPlatforms(){
  for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;rect(x,p.y,p.w,p.h,'#8b4b29');rect(x,p.y,p.w,12,'#43c95e');rect(x,p.y+10,p.w,7,'#a5f05b');
  for(let xx=x+8;xx<x+p.w-8;xx+=34){rect(xx,p.y+24,15,8,'#b96a38');rect(xx+12,p.y+55,14,9,'#6e3b31');rect(xx+2,p.y+78,8,7,'#d18a48')}
@@ -495,7 +531,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawPlatforms();drawPlatformDetails();drawGroundBirds();drawAmbientEffects();drawBreeze();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();drawWater();drawDragonflies();drawPlatforms();drawPlatformDetails();drawGroundBirds();drawAmbientEffects();drawBreeze();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
