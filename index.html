@@ -67,7 +67,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <body>
 <div class="wrap">
 <header><div class="logo">PUTOVERSO <small>ALPACA COLORIDA • A MUSGA VAI SALVAR O DIA!</small></div>
-<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><div class="pill">♫ Ondas: <b id="ammo">5/5</b></div><button class="start-top" id="startTop" type="button">▶ START</button><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
+<div class="hud"><div class="pill">💿 CDs: <b id="cds">0/3</b></div><div class="pill">💖 Vidas: <b id="lives">3</b></div><div class="pill">🎧 Controle: <b id="focus">100%</b></div><div class="pill">♫ Ondas: <b id="ammo">5/5</b></div><div class="pill">🛡️ Escudo: <b id="shield">PRONTO</b></div><button class="start-top" id="startTop" type="button">▶ START</button><button class="sound-toggle" id="soundToggle" type="button">♫ Som: ON</button><button class="restart" id="restart" type="button">↻ Reiniciar</button><button class="fullscreen" id="fullscreen" type="button">⛶ Tela cheia</button></div></header>
 <div class="stage"><canvas id="game" width="960" height="540" aria-label="Jogo de plataforma Alpaca Colorida"></canvas>
 <div class="menu-screen" id="menuScreen"><div class="menu-panel">
 <div class="menu-title">PUTOVERSO</div>
@@ -78,15 +78,15 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 </div></div></div>
 <div class="controls">
  <div class="pad"><button class="control" data-key="left">◀</button><button class="control" data-key="right">▶</button></div>
- <div class="pad"><button class="control" data-key="crouch">▼</button><button class="control" data-key="jump">⤒</button><button class="control" data-key="attack">♫</button></div>
+ <div class="pad"><button class="control" data-key="crouch">▼</button><button class="control" data-key="jump">⤒</button><button class="control" data-key="attack">♫</button><button class="control" data-key="shield">🛡️</button></div>
 </div>
-<div class="help"><span class="desktop">← → mover • ↓/S agachar • Espaço/W/↑ pular • X atacar</span><span>Toque nos botões para jogar no celular.</span><span>R reinicia a fase</span></div>
+<div class="help"><span class="desktop">← → mover • ↓/S agachar • Espaço/W/↑ pular • X atacar • C escudo</span><span>Toque nos botões para jogar no celular.</span><span>R reinicia a fase</span></div>
 </div>
 <script>
 (()=>{
 const c=document.getElementById('game'),ctx=c.getContext('2d');
-const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus'),ammo:document.getElementById('ammo')};
-let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,started=false,soundEnabled=true,audioCtx=null;
+const W=960,H=540,keys={left:false,right:false},ui={cds:document.getElementById('cds'),lives:document.getElementById('lives'),focus:document.getElementById('focus'),ammo:document.getElementById('ammo'),shield:document.getElementById('shield')};
+let player,cds,lives,focus,ammo,shots,particles,cam,frame,won,gameOver,shieldTimer=0,shieldCooldown=0,started=false,soundEnabled=true,audioCtx=null;
 const held={crouch:false};
 const menuScreen=document.getElementById('menuScreen');
 function playTone(freq=520,duration=.09){
@@ -105,8 +105,8 @@ function playTone(freq=520,duration=.09){
 const platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100},{x:3070,y:420,w:260,h:135},{x:3410,y:455,w:360,h:100},{x:3850,y:405,w:300,h:150},{x:4210,y:455,w:300,h:100}];
 const discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,y:355,taken:false}];
 const jokeHazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1}];
-function reset(){player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
-function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5'}
+function reset(){shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];cam=0;frame=0;won=false;gameOver=false;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud()}
+function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5';ui.shield.textContent=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO')}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
 function text(t,x,y,size=18,color='#fff'){ctx.font=`bold ${size}px monospace`;ctx.fillStyle='#241044';ctx.fillText(t,x+2,y+2);ctx.fillStyle=color;ctx.fillText(t,x,y)}
 function cloud(x,y,s=1){ctx.fillStyle='#ffffff';ctx.fillRect(x,y,42*s,16*s);ctx.fillRect(x+10*s,y-12*s,25*s,28*s);ctx.fillRect(x+30*s,y-5*s,25*s,21*s);ctx.fillStyle='#c9f4ff';ctx.fillRect(x+5*s,y+12*s,43*s,4*s)}
@@ -198,6 +198,16 @@ function drawScenery(){
   rect(x-1,y-3+bob,4,4,'#fff4a6');
  }
 }
+function drawShield(x,y,anim){
+ if(shieldTimer<=0)return;
+ const pulse=Math.sin(anim*.22)*2.5,alpha=.72+Math.sin(anim*.18)*.18;
+ ctx.save();ctx.translate(x+17,y+26);ctx.globalAlpha=alpha;
+ ctx.strokeStyle='#5cf3ff';ctx.lineWidth=3;ctx.beginPath();ctx.arc(0,0,35+pulse,0,Math.PI*2);ctx.stroke();
+ ctx.strokeStyle='#ff65d4';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,42-pulse,anim*.035,anim*.035+Math.PI*1.55);ctx.stroke();
+ ctx.strokeStyle='#ffe66b';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,0,29+pulse*.5,Math.PI+anim*.025,Math.PI*2+anim*.025);ctx.stroke();
+ for(let i=0;i<8;i++){const a=anim*.035+i*Math.PI/4;const r=39+pulse;ctx.fillStyle=i%2?'#ff65d4':'#ffe66b';ctx.fillRect(Math.cos(a)*r-2,Math.sin(a)*r-2,5,5)}
+ ctx.restore();
+}
 function drawPlatforms(){
  for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;rect(x,p.y,p.w,p.h,'#8b4b29');rect(x,p.y,p.w,12,'#43c95e');rect(x,p.y+10,p.w,7,'#a5f05b');
  for(let xx=x+8;xx<x+p.w-8;xx+=34){rect(xx,p.y+24,15,8,'#b96a38');rect(xx+12,p.y+55,14,9,'#6e3b31');rect(xx+2,p.y+78,8,7,'#d18a48')}
@@ -241,11 +251,12 @@ function collide(){
  player.on=false;
  for(const p of platforms){if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+18&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}
 }
-function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
+function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0&&shieldTimer<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;player.x=Math.max(40,player.x-130);if(lives<=0)gameOver=true}updateHud()}}}
 function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
+ shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
  jokeHazards.forEach(h=>{if(h.stunned>0){h.stunned--;}else if(h.speed){h.x+=h.speed*h.dir;if(h.x<=h.minX){h.x=h.minX;h.dir=1}else if(h.x>=h.maxX){h.x=h.maxX;h.dir=-1}}});
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
@@ -280,7 +291,7 @@ function draw(){
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
  drawBackground();drawScenery();drawPlatforms();drawHazards();discs.forEach(drawDisc);
  shots.forEach(drawShot);
- if(player.inv%10<6){if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
+ if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{text(p.kind==='ha'?'HA!':(p.glyph||'♫'),p.x-cam,p.y-p.t,17,p.kind==='ha'?'#ff65cb':(p.kind==='music'?['#fff06a','#ff65cb','#62f7ff'][p.t%3]:'#fff06a'))});
  if(900-cam>0&&900-cam<W){rect(900-cam,335,7,85,'#784629');rect(865-cam,330,78,34,'#fff0a0');text('MUSGA!',868-cam,353,13,'#5a2380')}
  if(4260-cam>0&&4260-cam<W){rect(4260-cam,340,8,115,'#784629');rect(4220-cam,326,88,34,'#ffe45b');text('FIM!',4234-cam,349,16,'#54247b')}
@@ -289,15 +300,16 @@ function draw(){
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
+function activateShield(){if(!started||gameOver||won||shieldCooldown>0)return;shieldTimer=180;shieldCooldown=480;playTone(620,.12);updateHud()}
 function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});
  // Três notinhas coloridas acompanham cada disparo da Onda Sonora.
  const nx=player.x+(player.dir>0?31:3),ny=player.y+19;
  ['♪','♫','♬'].forEach((glyph,i)=>particles.push({x:nx,y:ny+(i-1)*8,t:0,kind:'music',glyph,vx:player.dir*(1.1+i*.35),vy:-1.8-i*.35}));
 }
-function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='r'){reset();beginGame();}}
+function keydown(e){if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' ','x','X','a','d','w','s','S'].includes(e.key))e.preventDefault();if(e.key==='ArrowLeft'||e.key==='a')keys.left=true;if(e.key==='ArrowRight'||e.key==='d')keys.right=true;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=true;if(e.key===' '||e.key==='ArrowUp'||e.key==='w')jump();if(e.key.toLowerCase()==='x')attack();if(e.key.toLowerCase()==='c')activateShield();if(e.key.toLowerCase()==='r'){reset();beginGame();}}
 function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==='ArrowRight'||e.key==='d')keys.right=false;if(e.key==='ArrowDown'||e.key==='s'||e.key==='S')held.crouch=false}
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
-document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='attack')attack();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
+document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='attack')attack();if(k==='shield')activateShield();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
 const startTop=document.getElementById('startTop');
 function beginGame(){
  started=true;menuScreen.hidden=true;startTop.hidden=true;playTone(660,.12);
