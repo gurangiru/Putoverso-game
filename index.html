@@ -167,7 +167,32 @@ function drawBackground(){
  if(currentPhase===2){
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#292b75');sky.addColorStop(.58,'#7655a8');sky.addColorStop(1,'#ff9acb');ctx.fillStyle=sky;ctx.fillRect(-500,-300,worldWidth+1000,1200);
   ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(720,95,48,0,Math.PI*2);ctx.fill();
-  for(let i=0;i<22;i++){const bx=i*235-((cam*.16)%235),bh=100+(i*47)%170;ctx.fillStyle=['#30275f','#3d3478','#493477'][i%3];ctx.fillRect(bx,455-bh,145,bh);ctx.fillStyle='#7cf0ff';for(let wy=470-bh;wy<440;wy+=28)for(let wx=bx+16;wx<bx+130;wx+=30)ctx.fillRect(wx,wy,9,12)}
+  // Skyline urbana: prédios com silhuetas, telhados e fachadas diferentes.
+  const cityPalette=['#30275f','#3d3478','#493477','#26345f','#584078','#35456c','#47315f'];
+  for(let i=0;i<30;i++){
+   const bx=i*170-((cam*.16)%5100),bh=105+(i*53)%205,bw=112+(i*29)%58,top=455-bh,style=i%5;
+   ctx.fillStyle=cityPalette[i%cityPalette.length];ctx.fillRect(bx,top,bw,bh);
+   if(style===0){ctx.fillStyle='#24234f';ctx.fillRect(bx+8,top-12,bw-16,12);ctx.fillRect(bx+bw*.42,top-28,12,28)}
+   else if(style===1){ctx.fillStyle='#25264f';ctx.beginPath();ctx.moveTo(bx,top);ctx.lineTo(bx+bw/2,top-25);ctx.lineTo(bx+bw,top);ctx.fill()}
+   else if(style===2){ctx.fillStyle='#6a5790';ctx.fillRect(bx+8,top+10,bw-16,5);ctx.fillRect(bx+8,top+bh-18,bw-16,5)}
+   else if(style===3){ctx.fillStyle='#20284e';ctx.fillRect(bx+bw*.68,top-20,8,20);ctx.fillRect(bx+bw*.68-7,top-20,22,4)}
+   else{ctx.fillStyle='#29244f';ctx.fillRect(bx+12,top-9,bw-24,9);ctx.fillRect(bx+20,top-18,bw-40,9)}
+   for(let wy=top+18,row=0;wy<445;wy+=27,row++)for(let wx=bx+12,col=0;wx<bx+bw-10;wx+=25,col++){
+    const blink=Math.sin(frame*.075+i*2.7+row*1.8+col*2.1);
+    const lit=((i*7+row*3+col*5)%9)<5;
+    const flicker=((i+row*2+col*3)%7===0)&&blink>.35;
+    ctx.fillStyle=flicker?'#fff3a1':(lit?'#ffd889':'#171d43');
+    ctx.fillRect(wx,wy,10,13);
+    if(flicker){ctx.fillStyle='#fff6c9';ctx.fillRect(wx+3,wy+3,4,7)}
+   }
+   if(i%4===1||i%4===3){
+    const label=['MUSGA','PIXEL','24H','ALPA'][i%4],neon=['#ff5bc8','#65f5ff','#ffe66b','#a78bff'][i%4];
+    const sy=top+Math.min(65,bh*.42);
+    ctx.save();ctx.shadowColor=neon;ctx.shadowBlur=13;ctx.fillStyle='#17132f';ctx.fillRect(bx+10,sy-17,bw-20,25);
+    ctx.strokeStyle=neon;ctx.lineWidth=2;ctx.strokeRect(bx+10,sy-17,bw-20,25);
+    ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillStyle=neon;ctx.fillText(label,bx+bw/2,sy);ctx.restore();
+   }
+  }
   ctx.fillStyle='#ffdc8a';ctx.fillRect(-500,455,worldWidth+1000,100);return;
  }
  // Montanhas distantes em duas camadas para dar profundidade ao horizonte.
@@ -504,7 +529,18 @@ function drawHazards(){
    continue;
   }
   const faceDir=(player.x+player.w/2 < h.x+33)?-1:1;
+  if(currentPhase===2&&h.speed){
+   const wheelY=h.y+36+Math.sin(frame*.18)*1;ctx.fillStyle='#17152f';ctx.beginPath();ctx.arc(x+13,wheelY,7,0,Math.PI*2);ctx.arc(x+49,wheelY,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8cf2ff';ctx.fillRect(x+12,wheelY-2,38,4);ctx.fillStyle='#ff69c9';ctx.fillRect(x+46,wheelY-18,3,18);ctx.fillRect(x+41,wheelY-20,13,3);
+  }
   drawLaughHorse(x,h.y-10,faceDir,h.stunned||0);
+  if(currentPhase===2){
+   ctx.save();ctx.globalAlpha=h.stunned>0?.5:1;
+   ctx.fillStyle=h.speed?'#26345f':'#542b79';ctx.fillRect(x+9,h.y+8,34,19);ctx.fillStyle=h.speed?'#ffcf4a':'#65e7ff';ctx.fillRect(x+14,h.y+12,23,4);
+   ctx.fillStyle='#ff69c9';ctx.fillRect(x+4,h.y+28,9,5);ctx.fillRect(x+27,h.y+28,9,5);
+   ctx.fillStyle='#202044';ctx.fillRect(x+34,h.y-14,20,5);ctx.fillStyle='#8cf2ff';ctx.fillRect(x+37,h.y-16,14,4);
+   if(h.speed){ctx.fillStyle='#ffe66b';ctx.fillRect(x+19,h.y+17,5,5);ctx.fillStyle='#fff';ctx.fillRect(x+20,h.y+18,2,2)}
+   ctx.restore();
+  }
  }
 }
 function drawShot(s){ctx.fillStyle='#58f3ff';ctx.beginPath();ctx.arc(s.x-cam,s.y,10+s.life%3,0,Math.PI*2);ctx.fill();ctx.fillStyle='#ff5bd6';ctx.beginPath();ctx.arc(s.x-cam,s.y,4,0,Math.PI*2);ctx.fill();for(let i=0;i<3;i++){ctx.fillStyle=['#ffe45b','#ff5bd6','#62f7ff'][i];ctx.fillRect(s.x-cam-18-i*8,s.y-3+i*3,5,5)}}
