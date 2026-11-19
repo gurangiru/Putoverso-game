@@ -116,8 +116,22 @@ const phase1Hazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,ma
 const phase2Platforms=[{x:0,y:455,w:390,h:100},{x:450,y:415,w:250,h:140},{x:760,y:455,w:330,h:100},{x:1150,y:395,w:260,h:160},{x:1470,y:445,w:390,h:110},{x:1910,y:405,w:270,h:150},{x:2230,y:455,w:360,h:100},{x:2650,y:410,w:300,h:145},{x:3010,y:455,w:380,h:100},{x:3450,y:405,w:280,h:150},{x:3780,y:445,w:340,h:110},{x:4170,y:410,w:300,h:145},{x:4520,y:455,w:360,h:100}];
 const phase2Discs=[{x:560,y:365,taken:false},{x:2050,y:350,taken:false},{x:3620,y:350,taken:false}];
 const phase2Hazards=[{x:820,y:413,w:66,h:42,minX:780,maxX:1020,speed:1.35,dir:1},{x:1570,y:403,w:66,h:42,minX:1500,maxX:1790,speed:1.5,dir:-1},{x:2320,y:413,w:66,h:42,minX:2260,maxX:2540,speed:1.3,dir:1},{x:3530,y:363,w:66,h:42,minX:3470,maxX:3690,speed:1.6,dir:-1},{kind:'note',x:4250,y:350,w:34,h:42,minY:325,maxY:390,speedY:1.25,dirY:1}];
+const cityPedestrians=[
+ {x:155,minX:90,maxX:300,y:455,dir:1,speed:.42,laugh:0,cooldown:0},
+ {x:555,minX:485,maxX:650,y:415,dir:-1,speed:.34,laugh:0,cooldown:0},
+ {x:900,minX:790,maxX:1040,y:455,dir:1,speed:.48,laugh:0,cooldown:0},
+ {x:1220,minX:1170,maxX:1360,y:395,dir:-1,speed:.38,laugh:0,cooldown:0},
+ {x:1600,minX:1500,maxX:1780,y:445,dir:1,speed:.43,laugh:0,cooldown:0},
+ {x:1980,minX:1930,maxX:2140,y:405,dir:-1,speed:.36,laugh:0,cooldown:0},
+ {x:2350,minX:2260,maxX:2550,y:455,dir:1,speed:.4,laugh:0,cooldown:0},
+ {x:2730,minX:2670,maxX:2920,y:410,dir:-1,speed:.46,laugh:0,cooldown:0},
+ {x:3130,minX:3050,maxX:3360,y:455,dir:1,speed:.37,laugh:0,cooldown:0},
+ {x:3520,minX:3480,maxX:3690,y:405,dir:-1,speed:.44,laugh:0,cooldown:0},
+ {x:3860,minX:3810,maxX:4080,y:445,dir:1,speed:.35,laugh:0,cooldown:0},
+ {x:4250,minX:4190,maxX:4440,y:410,dir:-1,speed:.41,laugh:0,cooldown:0}
+];
 let platforms=phase1Platforms,discs=phase1Discs,jokeHazards=phase1Hazards;
-function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;victoryTimer=0;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);discs.forEach(d=>d.taken=false);updateHud();document.getElementById('victoryActions').classList.remove('show')}
+function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;victoryTimer=0;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);cityPedestrians.forEach(p=>{p.x=(p.minX+p.maxX)/2;p.laugh=0;p.cooldown=0});discs.forEach(d=>d.taken=false);updateHud();document.getElementById('victoryActions').classList.remove('show')}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5';ui.shield.textContent=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');ui.checkpoint.textContent=checkpointActive?'ATIVADO':'INÍCIO'}
 function respawnAtCheckpoint(){player.x=checkpointX;player.y=checkpointY;player.vx=0;player.vy=0;player.inv=90;focus=100;}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
@@ -542,6 +556,19 @@ function drawLaughHorse(x,y,faceDir=1,stunned=0){
   text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5');
  }
 }
+function drawCityPedestrians(){
+ if(currentPhase!==2)return;
+ for(const p of cityPedestrians){
+  const x=p.x-cam;if(x<-35||x>W+35)continue;
+  const walk=Math.sin(frame*.16+p.x*.03)*2,leg=Math.sin(frame*.22+p.x)*2;
+  ctx.save();ctx.translate(Math.round(x),Math.round(p.y-31+walk));if(p.dir<0){ctx.translate(18,0);ctx.scale(-1,1)}
+  rect(6,0,7,7,'#f2c49b');rect(4,-2,10,4,['#ffcf4a','#65eaff','#ff75c8'][Math.floor(p.x/100)%3]);rect(5,3,2,2,'#302044');rect(12,3,2,2,'#302044');
+  rect(4,8,11,11,['#58c9a5','#8b70e8','#e879a9'][Math.floor(p.x/80)%3]);rect(2,10,3,8,'#f2c49b');rect(15,10,3,8,'#f2c49b');
+  rect(5,19+leg,4,10,'#34345b');rect(11,19-leg,4,10,'#34345b');rect(3,27+leg,7,3,'#ffcf4a');rect(10,27-leg,7,3,'#65eaff');
+  ctx.restore();
+  if(p.laugh>0){const rise=(42-p.laugh)*.32;text('HA!',x-7,p.y-39-rise,11,'#fff36a');if(p.laugh>22)text('HA!',x+8,p.y-50-rise,9,'#ff75d5')}
+ }
+}
 function drawHazards(){
  for(const h of jokeHazards){
   let x=h.x-cam;if(x<-110||x>W+100)continue;
@@ -584,6 +611,18 @@ function update(){
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
  const shieldLabel=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');if(ui.shield.textContent!==shieldLabel)ui.shield.textContent=shieldLabel;
  jokeHazards.forEach(h=>{if(h.stunned>0){h.stunned--;}else{if(h.speed){h.x+=h.speed*h.dir;if(h.x<=h.minX){h.x=h.minX;h.dir=1}else if(h.x>=h.maxX){h.x=h.maxX;h.dir=-1}}if(h.speedY){h.y+=h.speedY*h.dirY;if(h.y<=h.minY){h.y=h.minY;h.dirY=1}else if(h.y>=h.maxY){h.y=h.maxY;h.dirY=-1}}}});
+  if(currentPhase===2){
+   for(const p of cityPedestrians){
+    if(p.cooldown>0)p.cooldown--;
+    if(p.laugh>0)p.laugh--;
+    p.x+=p.speed*p.dir;
+    if(p.x<=p.minX){p.x=p.minX;p.dir=1}else if(p.x>=p.maxX){p.x=p.maxX;p.dir=-1}
+    if(p.cooldown<=0){
+     const passer=jokeHazards.find(h=>h.kind!=='note'&&(h.stunned||0)<=0&&Math.abs((h.x+33)-p.x)<76);
+     if(passer){p.laugh=42;p.cooldown=155}
+    }
+   }
+  }
  player.anim++;player.attack=Math.max(0,player.attack-1);player.inv=Math.max(0,player.inv-1);
  player.crouching=held.crouch && player.on;
  const targetH=player.crouching?player.crouchH:player.standH;
@@ -631,7 +670,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawHazards();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawHazards();drawCityPedestrians();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
