@@ -182,17 +182,21 @@ function drawBackground(){
  if(currentPhase===2){
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#292b75');sky.addColorStop(.58,'#7655a8');sky.addColorStop(1,'#ff9acb');ctx.fillStyle=sky;ctx.fillRect(-500,-300,worldWidth+1000,1200);
   ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(720,95,48,0,Math.PI*2);ctx.fill();
-  // Avenida distante: aparece somente nos intervalos entre as fachadas.
+  // Meia-lua clara com brilho suave no céu noturno da cidade.
+  ctx.save();ctx.translate(225,112);ctx.shadowColor='#fff1c8';ctx.shadowBlur=15;ctx.fillStyle='#fff1c8';ctx.beginPath();ctx.moveTo(0,-27);ctx.quadraticCurveTo(-31,-4,-17,22);ctx.quadraticCurveTo(-8,34,8,28);ctx.quadraticCurveTo(-10,12,-7,-4);ctx.quadraticCurveTo(-4,-19,0,-27);ctx.closePath();ctx.fill();ctx.restore();
+  // Avenida distante: os carros passam com mais frequência nos vãos das fachadas.
   const roadY=382;ctx.fillStyle='#24263f';ctx.fillRect(-500,roadY,worldWidth+1000,43);
   ctx.fillStyle='#77748a';ctx.fillRect(-500,roadY,worldWidth+1000,3);ctx.fillRect(-500,roadY+40,worldWidth+1000,3);
   for(let dash=-500;dash<worldWidth+500;dash+=92){const dx=dash-(cam*.16%92);ctx.fillStyle='#f6d77b';ctx.fillRect(dx,roadY+20,38,3)}
-  for(let lane=0;lane<3;lane++){
-   const carX=((frame*(lane===1?2.15:1.55)+lane*510)%(worldWidth+700))-350-cam*.16;
-   const carY=roadY+7+lane*9,body=lane===0?'#ff6d9f':lane===1?'#65eaff':'#ffe36b';
+  for(let lane=0;lane<5;lane++){
+   const speed=[1.75,2.35,1.45,2.05,1.9][lane],carX=((frame*speed+lane*285)%(worldWidth+700))-350-cam*.16;
+   const carY=roadY+5+(lane%3)*10,body=['#ff6d9f','#65eaff','#ffe36b','#a78bfa','#7ef0b1'][lane];
    ctx.fillStyle='#11152e';ctx.fillRect(carX,carY+3,35,7);ctx.fillStyle=body;ctx.fillRect(carX+5,carY,25,7);ctx.fillRect(carX+11,carY-4,13,5);
    ctx.fillStyle='#fff6bd';ctx.fillRect(carX+29,carY+2,5,3);ctx.fillStyle='#ff6b85';ctx.fillRect(carX,carY+2,4,3);
    ctx.fillStyle='#15162c';ctx.fillRect(carX+7,carY+8,6,3);ctx.fillRect(carX+25,carY+8,6,3);
   }
+  // Faixa de cidade abaixo da avenida, ligando visualmente a pista às fachadas.
+  const underRoad=ctx.createLinearGradient(0,425,0,455);underRoad.addColorStop(0,'#37334f');underRoad.addColorStop(1,'#292943');ctx.fillStyle=underRoad;ctx.fillRect(-500,425,worldWidth+1000,30);ctx.fillStyle='#55516d';ctx.fillRect(-500,425,worldWidth+1000,3);
   // Skyline urbana: prédios com silhuetas, telhados e fachadas diferentes.
   const cityPalette=['#30275f','#3d3478','#493477','#26345f','#584078','#35456c','#47315f'];
   for(let i=0;i<30;i++){
