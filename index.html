@@ -113,9 +113,9 @@ function playTone(freq=520,duration=.09){
 const phase1Platforms=[{x:0,y:455,w:470,h:100},{x:535,y:420,w:250,h:135},{x:850,y:455,w:400,h:100},{x:1320,y:410,w:260,h:145},{x:1650,y:455,w:450,h:100},{x:2130,y:420,w:300,h:135},{x:2500,y:455,w:500,h:100},{x:3070,y:420,w:260,h:135},{x:3410,y:455,w:360,h:100},{x:3775,y:435,w:65,h:105},{x:3850,y:405,w:300,h:150},{x:4155,y:430,w:65,h:110},{x:4210,y:455,w:300,h:100}];
 const phase1Discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,y:355,taken:false}];
 const phase1Hazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1},{kind:'note',x:4170,y:365,w:34,h:42,minY:345,maxY:395,speedY:1.15,dirY:1}];
-const phase2Platforms=[{x:0,y:455,w:390,h:100},{x:450,y:415,w:250,h:140},{x:760,y:455,w:330,h:100},{x:1150,y:395,w:260,h:160},{x:1470,y:445,w:390,h:110},{x:1910,y:405,w:270,h:150},{x:2230,y:455,w:360,h:100},{x:2650,y:410,w:300,h:145},{x:3010,y:455,w:380,h:100},{x:3450,y:405,w:280,h:150},{x:3780,y:445,w:340,h:110},{x:4170,y:410,w:300,h:145},{x:4520,y:455,w:360,h:100}];
+const phase2Platforms=[{x:0,y:455,w:390,h:100},{x:450,y:415,w:250,h:140},{x:760,y:455,w:330,h:100},{x:1150,y:395,w:260,h:160},{x:1470,y:445,w:390,h:110},{x:1910,y:405,w:270,h:150},{x:2230,y:455,w:360,h:100},{x:2650,y:410,w:300,h:145},{x:3010,y:455,w:380,h:100},{x:3450,y:405,w:280,h:150},{x:3780,y:445,w:340,h:110},{x:4170,y:410,w:300,h:145},{x:4520,y:455,w:360,h:100},{x:4950,y:420,w:280,h:135},{x:5290,y:455,w:300,h:100},{x:5660,y:400,w:260,h:155},{x:5980,y:455,w:420,h:100}];
 const phase2Discs=[{x:560,y:365,taken:false},{x:2050,y:350,taken:false},{x:3620,y:350,taken:false}];
-const phase2Hazards=[{x:820,y:413,w:66,h:42,minX:780,maxX:1020,speed:1.35,dir:1},{x:1570,y:403,w:66,h:42,minX:1500,maxX:1790,speed:1.5,dir:-1},{x:2320,y:413,w:66,h:42,minX:2260,maxX:2540,speed:1.3,dir:1},{x:3530,y:363,w:66,h:42,minX:3470,maxX:3690,speed:1.6,dir:-1},{kind:'note',x:4250,y:350,w:34,h:42,minY:325,maxY:390,speedY:1.25,dirY:1}];
+const phase2Hazards=[{x:820,y:413,w:66,h:42,minX:780,maxX:1020,speed:1.35,dir:1},{x:1570,y:403,w:66,h:42,minX:1500,maxX:1790,speed:1.5,dir:-1},{x:2320,y:413,w:66,h:42,minX:2260,maxX:2540,speed:1.3,dir:1},{x:3530,y:363,w:66,h:42,minX:3470,maxX:3690,speed:1.6,dir:-1},{kind:'note',x:4250,y:350,w:34,h:42,minY:325,maxY:390,speedY:1.25,dirY:1},{x:5060,y:378,w:66,h:42,minX:4990,maxX:5160,speed:1.55,dir:1},{x:5720,y:358,w:66,h:42,minX:5680,maxX:5860,speed:1.7,dir:-1},{kind:'note',x:6100,y:365,w:34,h:42,minY:340,maxY:400,speedY:1.35,dirY:1}];
 const cityPedestrians=[
  {x:155,minX:90,maxX:300,y:455,dir:1,speed:.42,laugh:0,cooldown:0},
  {x:555,minX:485,maxX:650,y:415,dir:-1,speed:.34,laugh:0,cooldown:0},
@@ -128,7 +128,10 @@ const cityPedestrians=[
  {x:3130,minX:3050,maxX:3360,y:455,dir:1,speed:.37,laugh:0,cooldown:0},
  {x:3520,minX:3480,maxX:3690,y:405,dir:-1,speed:.44,laugh:0,cooldown:0},
  {x:3860,minX:3810,maxX:4080,y:445,dir:1,speed:.35,laugh:0,cooldown:0},
- {x:4250,minX:4190,maxX:4440,y:410,dir:-1,speed:.41,laugh:0,cooldown:0}
+ {x:4250,minX:4190,maxX:4440,y:410,dir:-1,speed:.41,laugh:0,cooldown:0},
+ {x:5050,minX:4980,maxX:5180,y:420,dir:1,speed:.39,laugh:0,cooldown:0},
+ {x:5750,minX:5680,maxX:5880,y:400,dir:-1,speed:.43,laugh:0,cooldown:0},
+ {x:6120,minX:6030,maxX:6320,y:455,dir:1,speed:.36,laugh:0,cooldown:0}
 ];
 cityPedestrians.forEach((p,i)=>{p.reactionType=i%3;p.reactionTimer=0});
 let platforms=phase1Platforms,discs=phase1Discs,jokeHazards=phase1Hazards;
@@ -199,8 +202,8 @@ function drawBackground(){
   const underRoad=ctx.createLinearGradient(0,425,0,455);underRoad.addColorStop(0,'#37334f');underRoad.addColorStop(1,'#292943');ctx.fillStyle=underRoad;ctx.fillRect(-500,425,worldWidth+1000,30);ctx.fillStyle='#55516d';ctx.fillRect(-500,425,worldWidth+1000,3);
   // Skyline urbana: prédios com silhuetas, telhados e fachadas diferentes.
   const cityPalette=['#30275f','#3d3478','#493477','#26345f','#584078','#35456c','#47315f'];
-  for(let i=0;i<30;i++){
-   const bx=i*170-((cam*.16)%5100),bh=105+(i*53)%205,bw=112+(i*29)%58,top=455-bh,style=i%5;
+  for(let i=0;i<38;i++){
+   const bx=i*170-((cam*.16)%6460),bh=105+(i*53)%205,bw=112+(i*29)%58,top=455-bh,style=i%5;
    ctx.fillStyle=cityPalette[i%cityPalette.length];ctx.fillRect(bx,top,bw,bh);
    if(style===0){ctx.fillStyle='#24234f';ctx.fillRect(bx+8,top-12,bw-16,12);ctx.fillRect(bx+bw*.42,top-28,12,28)}
    else if(style===1){ctx.fillStyle='#25264f';ctx.beginPath();ctx.moveTo(bx,top);ctx.lineTo(bx+bw/2,top-25);ctx.lineTo(bx+bw,top);ctx.fill()}
@@ -735,8 +738,8 @@ function draw(){
  if(won){document.getElementById('victoryActions').classList.add('show');document.getElementById('nextPhaseButton').disabled=!cityUnlocked;document.getElementById('nextPhaseButton').hidden=currentPhase===2;document.getElementById('replayButton').textContent=currentPhase===1?'↻ JOGAR NOVAMENTE':'↻ JOGAR FASE 2 NOVAMENTE';ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text(currentPhase===1?'CAMPOS DA DESARMONIA':'CIDADE DO DUPLO SENTIDO',W/2-235,150,24,'#ffe65c');text('CONCLUÍDOS!',W/2-115,190,30,'#ff8bd5');text('A Alpaca recuperou as 3 musgas!',W/2-220,235,16,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text(currentPhase===1?'PRÓXIMA AVENTURA':'PRÓXIMO DESTINO',W/2-135,310,15,'#ffe66b');text(currentPhase===1?'CIDADE DO DUPLO SENTIDO':'CASTELO DA VERGONHA ALHEIA',W/2-190,348,16,'#8ff4ff');text(currentPhase===1?(cityUnlocked?'FASE 2 DESBLOQUEADA!':'A próxima aventura está chegando...'):'FASE 2 CONCLUÍDA!',W/2-190,382,14,'#ffe66b');text('Use os botões para continuar',W/2-170,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
-function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=4800;goalX=4635;reset();beginGame();}
-function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else{platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=4800;goalX=4635}reset();beginGame();}
+function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=6500;goalX=6190;reset();beginGame();}
+function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else{platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=6500;goalX=6190}reset();beginGame();}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function activateShield(){if(!started||gameOver||won||shieldCooldown>0)return;shieldTimer=180;shieldCooldown=480;playTone(620,.12);updateHud()}
 function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});
