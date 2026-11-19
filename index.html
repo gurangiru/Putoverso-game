@@ -182,6 +182,17 @@ function drawBackground(){
  if(currentPhase===2){
   const sky=ctx.createLinearGradient(0,0,0,H);sky.addColorStop(0,'#292b75');sky.addColorStop(.58,'#7655a8');sky.addColorStop(1,'#ff9acb');ctx.fillStyle=sky;ctx.fillRect(-500,-300,worldWidth+1000,1200);
   ctx.fillStyle='#ffe9a1';ctx.beginPath();ctx.arc(720,95,48,0,Math.PI*2);ctx.fill();
+  // Avenida distante: aparece somente nos intervalos entre as fachadas.
+  const roadY=382;ctx.fillStyle='#24263f';ctx.fillRect(-500,roadY,worldWidth+1000,43);
+  ctx.fillStyle='#77748a';ctx.fillRect(-500,roadY,worldWidth+1000,3);ctx.fillRect(-500,roadY+40,worldWidth+1000,3);
+  for(let dash=-500;dash<worldWidth+500;dash+=92){const dx=dash-(cam*.16%92);ctx.fillStyle='#f6d77b';ctx.fillRect(dx,roadY+20,38,3)}
+  for(let lane=0;lane<3;lane++){
+   const carX=((frame*(lane===1?2.15:1.55)+lane*510)%(worldWidth+700))-350-cam*.16;
+   const carY=roadY+7+lane*9,body=lane===0?'#ff6d9f':lane===1?'#65eaff':'#ffe36b';
+   ctx.fillStyle='#11152e';ctx.fillRect(carX,carY+3,35,7);ctx.fillStyle=body;ctx.fillRect(carX+5,carY,25,7);ctx.fillRect(carX+11,carY-4,13,5);
+   ctx.fillStyle='#fff6bd';ctx.fillRect(carX+29,carY+2,5,3);ctx.fillStyle='#ff6b85';ctx.fillRect(carX,carY+2,4,3);
+   ctx.fillStyle='#15162c';ctx.fillRect(carX+7,carY+8,6,3);ctx.fillRect(carX+25,carY+8,6,3);
+  }
   // Skyline urbana: prédios com silhuetas, telhados e fachadas diferentes.
   const cityPalette=['#30275f','#3d3478','#493477','#26345f','#584078','#35456c','#47315f'];
   for(let i=0;i<30;i++){
@@ -210,6 +221,16 @@ function drawBackground(){
     }else{ctx.font='bold 12px monospace';ctx.textAlign='center';ctx.fillStyle=neon;ctx.fillText(label,bx+bw/2,sy)}
     ctx.restore();
    }
+  }
+  // Avião ocasional cruzando o céu, em pixel art e sem colisão.
+  const flight=frame%2400;
+  if(flight<430){
+   const planeX=cam*.16-125+flight*3.25,planeY=72+Math.sin(flight*.035)*9;
+   ctx.save();ctx.translate(Math.round(planeX),Math.round(planeY));
+   ctx.fillStyle='#1d244d';ctx.fillRect(0,7,48,6);ctx.fillRect(40,4,13,3);ctx.fillRect(8,1,22,5);ctx.fillRect(17,11,18,4);ctx.fillRect(3,3,5,4);
+   ctx.fillStyle='#e8f7ff';ctx.fillRect(4,6,43,4);ctx.fillRect(14,0,17,5);ctx.fillRect(20,10,13,3);ctx.fillRect(43,4,9,3);
+   ctx.fillStyle='#ffcf69';ctx.fillRect(46,7,4,3);ctx.fillStyle='#ff75c8';ctx.fillRect(2,7,3,3);
+   ctx.restore();
   }
   // Subsolo: túnel de metrô visível nos vãos entre plataformas.
   const tunnel=ctx.createLinearGradient(0,455,0,850);tunnel.addColorStop(0,'#292443');tunnel.addColorStop(.45,'#17172f');tunnel.addColorStop(1,'#090d20');ctx.fillStyle=tunnel;ctx.fillRect(-500,455,worldWidth+1000,500);
