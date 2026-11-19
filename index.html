@@ -130,8 +130,9 @@ const cityPedestrians=[
  {x:3860,minX:3810,maxX:4080,y:445,dir:1,speed:.35,laugh:0,cooldown:0},
  {x:4250,minX:4190,maxX:4440,y:410,dir:-1,speed:.41,laugh:0,cooldown:0}
 ];
+cityPedestrians.forEach((p,i)=>{p.reactionType=i%3;p.reactionTimer=0});
 let platforms=phase1Platforms,discs=phase1Discs,jokeHazards=phase1Hazards;
-function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;victoryTimer=0;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);cityPedestrians.forEach(p=>{p.x=(p.minX+p.maxX)/2;p.laugh=0;p.cooldown=0});discs.forEach(d=>d.taken=false);updateHud();document.getElementById('victoryActions').classList.remove('show')}
+function reset(){resetGroundBirds();shieldTimer=0;shieldCooldown=0;player={x:70,y:370,vx:0,vy:0,w:34,h:52,standH:52,crouchH:30,on:false,dir:1,inv:0,anim:0,attack:0,crouching:false};held.crouch=false;cds=0;lives=3;focus=100;ammo=5;shots=[];particles=[];flowerTriggers.clear();cam=0;frame=0;won=false;gameOver=false;victoryTimer=0;checkpointActive=false;checkpointX=70;checkpointY=370;jokeHazards.forEach(h=>h.stunned=0);cityPedestrians.forEach(p=>{p.x=(p.minX+p.maxX)/2;p.laugh=0;p.cooldown=0;p.reactionTimer=0});discs.forEach(d=>d.taken=false);updateHud();document.getElementById('victoryActions').classList.remove('show')}
 function updateHud(){ui.cds.textContent=cds+'/3';ui.lives.textContent=lives;ui.focus.textContent=Math.max(0,Math.round(focus))+'%';ui.ammo.textContent=ammo+'/5';ui.shield.textContent=shieldTimer>0?'ATIVO':(shieldCooldown>0?'RECARGA '+Math.ceil(shieldCooldown/60)+'s':'PRONTO');ui.checkpoint.textContent=checkpointActive?'ATIVADO':'INÍCIO'}
 function respawnAtCheckpoint(){player.x=checkpointX;player.y=checkpointY;player.vx=0;player.vy=0;player.inv=90;focus=100;}
 function rect(x,y,w,h,color){ctx.fillStyle=color;ctx.fillRect(Math.round(x),Math.round(y),w,h)}
@@ -561,12 +562,18 @@ function drawCityPedestrians(){
  for(const p of cityPedestrians){
   const x=p.x-cam;if(x<-35||x>W+35)continue;
   const walk=Math.sin(frame*.16+p.x*.03)*2,leg=Math.sin(frame*.22+p.x)*2;
+  const reacting=p.reactionTimer>0,prelude=reacting&&p.reactionType!==0&&p.reactionTimer>48;
   ctx.save();ctx.translate(Math.round(x),Math.round(p.y-31+walk));if(p.dir<0){ctx.translate(18,0);ctx.scale(-1,1)}
   rect(6,0,7,7,'#f2c49b');rect(4,-2,10,4,['#ffcf4a','#65eaff','#ff75c8'][Math.floor(p.x/100)%3]);rect(5,3,2,2,'#302044');rect(12,3,2,2,'#302044');
-  rect(4,8,11,11,['#58c9a5','#8b70e8','#e879a9'][Math.floor(p.x/80)%3]);rect(2,10,3,8,'#f2c49b');rect(15,10,3,8,'#f2c49b');
+  if(reacting&&p.reactionType===2&&prelude){rect(8,5,5,4,'#542044');rect(2,6,3,3,'#fff')}
+  rect(4,8,11,11,['#58c9a5','#8b70e8','#e879a9'][Math.floor(p.x/80)%3]);
+  if(prelude&&p.reactionType===1){rect(15,7,11,3,'#f2c49b');rect(23,5,4,3,'#ffcf4a')}
+  else if(prelude&&p.reactionType===2){rect(1,3,3,8,'#f2c49b');rect(15,3,3,8,'#f2c49b')}
+  else{rect(2,10,3,8,'#f2c49b');rect(15,10,3,8,'#f2c49b')}
   rect(5,19+leg,4,10,'#34345b');rect(11,19-leg,4,10,'#34345b');rect(3,27+leg,7,3,'#ffcf4a');rect(10,27-leg,7,3,'#65eaff');
   ctx.restore();
-  if(p.laugh>0){const rise=(42-p.laugh)*.32;text('HA!',x-7,p.y-39-rise,11,'#fff36a');if(p.laugh>22)text('HA!',x+8,p.y-50-rise,9,'#ff75d5')}
+  if(prelude){const callout=p.reactionType===1?'OLHA!':'UÉ?!';text(callout,x-12,p.y-43,10,p.reactionType===1?'#8cf2ff':'#ff9bcf')}
+  else if(reacting||p.laugh>0){const rise=(72-p.reactionTimer)*.22;text('HA!',x-7,p.y-39-rise,11,'#fff36a');if(p.reactionTimer>22)text('HA!',x+8,p.y-50-rise,9,'#ff75d5')}
  }
 }
 function drawHazards(){
@@ -615,11 +622,12 @@ function update(){
    for(const p of cityPedestrians){
     if(p.cooldown>0)p.cooldown--;
     if(p.laugh>0)p.laugh--;
+    if(p.reactionTimer>0)p.reactionTimer--;
     p.x+=p.speed*p.dir;
     if(p.x<=p.minX){p.x=p.minX;p.dir=1}else if(p.x>=p.maxX){p.x=p.maxX;p.dir=-1}
     if(p.cooldown<=0){
      const passer=jokeHazards.find(h=>h.kind!=='note'&&(h.stunned||0)<=0&&Math.abs((h.x+33)-p.x)<76);
-     if(passer){p.laugh=42;p.cooldown=155}
+     if(passer){p.laugh=42;p.reactionTimer=72;p.cooldown=155}
     }
    }
   }
