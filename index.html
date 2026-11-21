@@ -294,6 +294,7 @@ function drawBackground(){
  ctx.lineWidth=12;['#ff5d9e','#ffb52e','#fff05a','#55df80','#39caff','#8a66ff'].forEach((col,i)=>{ctx.strokeStyle=col;ctx.beginPath();ctx.arc(760-cam*.08,210,95-i*11,Math.PI,Math.PI*2);ctx.stroke()});
 }
 function drawFlyingCreatures(){
+ if(currentPhase===4)return;
  if(currentPhase===2){for(let i=0;i<9;i++){const x=((i*180-frame*.7-cam*.4)%1180+1180)%1180-40,y=170+(i%4)*48+Math.sin(frame*.04+i)*9;ctx.fillStyle=i%2?'#fff1a8':'#8ff4ff';ctx.fillRect(x,y,13,3);ctx.fillRect(x+5,y-5,3,13)}return;}
  // Borboletas coloridas voam entre as copas, com asas batendo suavemente.
  const butterflies=[{x:245,y:285,c:'#ff65c8'},{x:930,y:245,c:'#ffe45b'},{x:1580,y:300,c:'#73f0ff'},{x:2310,y:260,c:'#c49aff'},{x:3050,y:292,c:'#ff9b55'},{x:3820,y:248,c:'#ff75b8'}];
@@ -364,6 +365,7 @@ function drawGroundBirds(){
  }
 }
 function drawScenery(){
+ if(currentPhase===4)return;
  if(currentPhase===3){
   // Tapeçarias e correntes do salão.
   for(let i=0;i<12;i++){const x=i*390+95-cam;if(x<-100||x>W+100)continue;ctx.fillStyle='#241735';ctx.fillRect(x,205,46,125);ctx.fillStyle=i%2?'#713c83':'#8c3e72';ctx.beginPath();ctx.moveTo(x+4,210);ctx.lineTo(x+42,210);ctx.lineTo(x+40,300);ctx.lineTo(x+23,327);ctx.lineTo(x+6,300);ctx.closePath();ctx.fill();ctx.fillStyle='#ffe58a';ctx.fillRect(x+19,230,8,8);ctx.fillRect(x+14,244,18,5);ctx.fillRect(x+19,254,8,16)}
@@ -513,7 +515,11 @@ function drawCityPipes(){
  }
 }
 function drawPlatforms(){
- for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;if(currentPhase===3){
+ for(const p of platforms){let x=p.x-cam;if(x>W||x+p.w<0)continue;if(currentPhase===4){
+   rect(x,p.y,p.w,p.h,'#30243b');rect(x,p.y,p.w,8,'#9b6b83');rect(x,p.y+8,p.w,5,'#d1a36a');
+   rect(x,p.y+20,p.w,4,'#211a2c');for(let xx=x+12;xx<x+p.w-10;xx+=58){rect(xx,p.y+42,34,4,'#49334b');rect(xx+8,p.y+68,18,3,'#241b30')}
+   rect(x+5,p.y+p.h-10,p.w-10,6,'#171323');continue;
+  }if(currentPhase===3){
    rect(x,p.y,p.w,p.h,'#494052');rect(x,p.y,p.w,7,'#b49ab2');rect(x,p.y+7,p.w,5,'#796783');rect(x,p.y+12,p.w,5,'#d0b5a2');
    for(let xx=x+8;xx<x+p.w-8;xx+=42){rect(xx,p.y+24,30,3,'#30283d');rect(xx+9,p.y+45,18,4,'#5c4d64');rect(xx+2,p.y+72,23,3,'#382d49')}
    rect(x+5,p.y+p.h-9,p.w-10,5,'#30263d');continue;
@@ -563,6 +569,7 @@ function drawPlatformDetails(){
  }
 }
 function drawAmbientEffects(){
+ if(currentPhase===4){for(let i=0;i<18;i++){const x=((i*157-frame*.22-cam*.7)%1180+1180)%1180,y=95+(i*67)%300;const pulse=(Math.sin(frame*.06+i)+1)/2;ctx.globalAlpha=.25+pulse*.55;ctx.fillStyle=i%3?'#ffb65c':'#d68cff';ctx.fillRect(x,y,2+(i%3===0?1:0),2+(i%3===0?1:0))}ctx.globalAlpha=1;return}
  if(currentPhase===3){for(let i=0;i<12;i++){const x=((i*293-frame*.18-cam*.72)%1180+1180)%1180,y=125+(i*83)%290,pulse=(Math.sin(frame*.045+i)+1)/2;ctx.globalAlpha=.35+pulse*.5;ctx.fillStyle=i%3?'#b9a5ff':'#ffd58a';ctx.fillRect(x,y,2,2)}ctx.globalAlpha=1;return}
  
  if(currentPhase===2){for(let i=0;i<28;i++){const x=((i*137-frame*.35-cam*.8)%1180+1180)%1180,y=100+(i*53)%300;ctx.fillStyle=i%2?'#fff1a8':'#9af6ff';ctx.fillRect(x,y,3,3)}return;}
@@ -688,11 +695,14 @@ function drawCastleMechanisms(){if(currentPhase!==3)return;
 function drawFinalBossArena(){
  if(currentPhase!==4)return;
  const x=1510-cam;
- // Trono monumental ao fundo: a arena está pronta, mas o chefe ainda não entrou em combate.
+ // Trono monumental do salão final.
  ctx.fillStyle='#29152f';ctx.fillRect(x-145,190,290,265);ctx.fillStyle='#70435a';ctx.fillRect(x-125,165,250,290);ctx.fillStyle='#c69a58';ctx.fillRect(x-111,180,222,275);ctx.fillStyle='#24162e';ctx.fillRect(x-91,202,182,253);
  ctx.fillStyle='#e7bd68';ctx.fillRect(x-13,178,26,180);ctx.fillRect(x-82,242,164,12);ctx.fillRect(x-72,345,144,10);
  ctx.fillStyle='#f2c85f';ctx.fillRect(x-48,120,96,12);ctx.fillRect(x-35,95,18,30);ctx.fillRect(x-8,78,18,48);ctx.fillRect(x+20,96,18,29);
  ctx.fillStyle='#4a2a49';ctx.fillRect(x-245,430,490,25);ctx.fillStyle='#d4a65e';ctx.fillRect(x-245,425,490,6);
+ // Tapete real conduz até o trono, com brasões dourados.
+ ctx.fillStyle='#6e244f';ctx.fillRect(x-215,448,430,7);ctx.fillStyle='#d4a65e';ctx.fillRect(x-215,455,430,3);
+ for(let i=0;i<9;i++){const rx=x-190+i*47;ctx.fillStyle='#e7bd68';ctx.fillRect(rx,438,3,15);ctx.fillRect(rx-3,443,9,3)}
  // Estandartes e emblema musical real.
  for(let i=0;i<2;i++){const bx=x-300+i*600;ctx.fillStyle='#792e68';ctx.fillRect(bx,110,54,150);ctx.fillStyle='#e5bd65';ctx.fillRect(bx+23,110,8,120);ctx.fillStyle='#ff8acb';ctx.fillRect(bx+10,260,34,15)}
  ctx.fillStyle='#ffe18a';ctx.font='bold 18px monospace';ctx.fillText('A ÚLTIMA MUSGA',x-105,55);
