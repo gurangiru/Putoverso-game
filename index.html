@@ -351,8 +351,15 @@ function drawGroundBirds(){
 }
 function drawScenery(){
  if(currentPhase===3){
+  // Tapeçarias e correntes do salão.
   for(let i=0;i<12;i++){const x=i*390+95-cam;if(x<-100||x>W+100)continue;ctx.fillStyle='#241735';ctx.fillRect(x,205,46,125);ctx.fillStyle=i%2?'#713c83':'#8c3e72';ctx.beginPath();ctx.moveTo(x+4,210);ctx.lineTo(x+42,210);ctx.lineTo(x+40,300);ctx.lineTo(x+23,327);ctx.lineTo(x+6,300);ctx.closePath();ctx.fill();ctx.fillStyle='#ffe58a';ctx.fillRect(x+19,230,8,8);ctx.fillRect(x+14,244,18,5);ctx.fillRect(x+19,254,8,16)}
   for(let i=0;i<18;i++){const x=i*250+45-cam;if(x<-20||x>W+20)continue;const sway=Math.sin(frame*.035+i)*4;ctx.strokeStyle='#8c7893';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x+sway,92);ctx.stroke();ctx.fillStyle='#b7a0bd';ctx.fillRect(x+sway-4,90,9,7)}
+  // Armaduras decorativas: passos alternados e elmos que balançam.
+  const armors=[420,1510,2630,3740];armors.forEach((wx,i)=>{const x=wx-cam;if(x<-35||x>W+35)return;const step=Math.sin(frame*.12+i)*2;ctx.fillStyle='#27243c';ctx.fillRect(x-12,425,38,8);ctx.fillStyle='#8b91a9';ctx.fillRect(x-7,383+step,27,35);ctx.fillStyle='#c0c6d5';ctx.fillRect(x-4,377+step,21,11);ctx.fillStyle='#69728e';ctx.fillRect(x-9,389+step,8,23);ctx.fillRect(x+20,389-step,8,23);ctx.fillStyle='#aeb8ce';ctx.fillRect(x-5,414+step,9,13);ctx.fillRect(x+9,414-step,9,13);ctx.fillStyle='#e5d6a1';ctx.fillRect(x+1,380+step,12,3);ctx.fillStyle='#17152d';ctx.fillRect(x+1,386+step,14,4);ctx.fillStyle='#ffdf76';ctx.fillRect(x+5,387+step,3,2);ctx.fillRect(x+11,387+step,3,2);ctx.fillStyle='#9d7caa';ctx.fillRect(x+3,365+step,15,13);ctx.fillStyle='#e9c77e';ctx.fillRect(x+9,359+step,4,9);ctx.fillStyle='#e9c77e';ctx.fillRect(x-12,378+step,7,4);ctx.fillRect(x+24,378-step,7,4)});
+  // Retratos: mudam de expressão quando a Alpaca se aproxima.
+  const portraits=[760,1870,3010,4210];portraits.forEach((wx,i)=>{const x=wx-cam;if(x<-45||x>W+45)return;const near=Math.abs(player.x+player.w/2-wx)<150,blink=Math.sin(frame*.08+i)>0.94;ctx.fillStyle='#6c4a36';ctx.fillRect(x-22,238,44,62);ctx.fillStyle='#d4a85e';ctx.fillRect(x-18,242,36,54);ctx.fillStyle='#38294a';ctx.fillRect(x-13,247,26,44);ctx.fillStyle=['#e9b58d','#c9a4e8','#e6c28c','#b5d8d1'][i];ctx.fillRect(x-10,251,20,30);ctx.fillStyle='#302044';ctx.fillRect(x-6,260,3,3);ctx.fillRect(x+4,260,3,3);ctx.fillStyle='#713a58';if(near){ctx.fillRect(x-5,270,12,5);ctx.fillStyle='#fff';ctx.fillRect(x-4,270,10,2)}else if(blink){ctx.fillRect(x-5,269,11,2)}else{ctx.fillRect(x-3,270,7,2)}ctx.fillStyle='#ffe18a';ctx.fillRect(x-2,283,4,3)});
+  // Fantasminhas flutuam pelo salão, sem interferir nas colisões.
+  const ghosts=[560,1120,2240,3380,4380];ghosts.forEach((wx,i)=>{const x=wx-cam;if(x<-30||x>W+30)return;const bob=Math.sin(frame*.07+i*1.7)*7;ctx.globalAlpha=.78;ctx.fillStyle=i%2?'#a9f4ff':'#e6d7ff';ctx.beginPath();ctx.arc(x,330+bob,13,Math.PI,0);ctx.lineTo(x+13,350+bob);ctx.lineTo(x+7,346+bob);ctx.lineTo(x,351+bob);ctx.lineTo(x-7,346+bob);ctx.lineTo(x-13,350+bob);ctx.closePath();ctx.fill();ctx.globalAlpha=1;ctx.fillStyle='#34234c';ctx.fillRect(x-6,329+bob,3,4);ctx.fillRect(x+3,329+bob,3,4);ctx.fillStyle='#ff83c8';ctx.fillRect(x-2,337+bob,5,3);if(Math.abs(player.x+player.w/2-wx)<125&&frame%90<35){ctx.fillStyle='#fff2a6';ctx.font='bold 10px monospace';ctx.fillText('BU!',x-9,315+bob)}});
   return;
  }
  
@@ -654,6 +661,14 @@ function drawHazards(){
    const wheelY=h.y+36+Math.sin(frame*.18)*1;ctx.fillStyle='#17152f';ctx.beginPath();ctx.arc(x+13,wheelY,7,0,Math.PI*2);ctx.arc(x+49,wheelY,7,0,Math.PI*2);ctx.fill();ctx.fillStyle='#8cf2ff';ctx.fillRect(x+12,wheelY-2,38,4);ctx.fillStyle='#ff69c9';ctx.fillRect(x+46,wheelY-18,3,18);ctx.fillRect(x+41,wheelY-20,13,3);
   }
   drawLaughHorse(x,h.y-10,faceDir,h.stunned||0);
+  if(currentPhase===3){
+   // Traje de guardião medieval: capa, peitoral e coroa torta.
+   ctx.save();ctx.globalAlpha=h.stunned>0?.55:1;
+   ctx.fillStyle='#542b79';ctx.fillRect(x+7,h.y+8,34,24);ctx.fillStyle='#9b3f79';ctx.fillRect(x+3,h.y+12,10,21);ctx.fillRect(x+36,h.y+13,9,20);
+   ctx.fillStyle='#9da9bd';ctx.fillRect(x+12,h.y+9,27,16);ctx.fillStyle='#d7dce7';ctx.fillRect(x+16,h.y+11,19,4);ctx.fillStyle='#6d557d';ctx.fillRect(x+22,h.y+15,7,8);
+   ctx.fillStyle='#f0c76b';ctx.fillRect(x+15,h.y-17,24,5);ctx.fillRect(x+17,h.y-22,4,7);ctx.fillRect(x+25,h.y-25,4,10);ctx.fillRect(x+34,h.y-21,4,6);
+   ctx.fillStyle='#fff0a1';ctx.fillRect(x+24,h.y+17,4,4);ctx.restore();
+  }
   if(currentPhase===2){
    ctx.save();ctx.globalAlpha=h.stunned>0?.5:1;
    ctx.fillStyle=h.speed?'#26345f':'#542b79';ctx.fillRect(x+9,h.y+8,34,19);ctx.fillStyle=h.speed?'#ffcf4a':'#65e7ff';ctx.fillRect(x+14,h.y+12,23,4);
