@@ -606,29 +606,33 @@ function drawBreeze(){
  }
 }
 function drawDisc(d){let x=d.x-cam;if(x<-30||x>W+30||d.taken)return;ctx.save();ctx.translate(x,d.y+Math.sin(frame*.08)*4);ctx.fillStyle='#ffeb65';ctx.beginPath();ctx.arc(0,0,15,0,Math.PI*2);ctx.fill();ctx.fillStyle='#f6a6ff';ctx.beginPath();ctx.arc(0,0,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#5131a0';ctx.beginPath();ctx.arc(0,0,4,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff';ctx.fillRect(-8,-7,5,2);ctx.restore()}
+function drawMijaoFace(){
+ rect(12,25,38,27,'#a94f32');rect(17,19,34,31,'#ef963f');rect(22,15,27,29,'#ffb34f');
+ rect(17,2,8,20,'#d77b39');rect(19,0,5,17,'#3b2930');rect(20,4,3,12,'#f3a04b');
+ rect(43,1,8,21,'#d77b39');rect(45,0,5,17,'#3b2930');rect(46,4,3,12,'#f3a04b');
+ rect(19,14,29,9,'#4a3030');rect(14,18,12,8,'#5b3531');rect(24,12,8,9,'#5b3531');rect(32,14,8,8,'#3c2930');rect(40,16,9,9,'#4a3030');
+ rect(48,23,8,23,'#4b3030');rect(51,30,7,18,'#754238');rect(47,42,8,8,'#4b3030');
+ rect(18,24,13,12,'#613b35');rect(20,25,10,9,'#fff0d8');rect(22,26,6,8,'#332b32');rect(23,26,3,3,'#fff');
+ rect(37,23,13,14,'#613b35');rect(39,24,10,11,'#fff0d8');rect(41,25,6,9,'#332b32');rect(42,25,3,3,'#fff');
+ rect(17,22,14,3,'#4a3030');rect(37,21,14,3,'#4a3030');
+ rect(8,34,43,14,'#554e55');rect(11,32,37,15,'#777078');rect(14,36,31,9,'#4b454e');
+ rect(16,36,8,6,'#292832');rect(36,36,8,6,'#292832');rect(17,36,3,2,'#b5aeb2');rect(37,36,3,2,'#b5aeb2');
+ rect(19,46,25,4,'#fff0cf');rect(22,46,3,4,'#d9b99b');rect(31,46,3,4,'#d9b99b');rect(40,46,3,4,'#d9b99b');
+ rect(29,49,13,5,'#e85f78');rect(31,50,9,4,'#ff8b9c');rect(34,50,2,3,'#cf4968');
+ rect(29,32,2,2,'#b96540');rect(33,30,2,2,'#b96540');rect(46,31,2,2,'#b96540');
+}
 function drawLaughHorse(x,y,faceDir=1,stunned=0){
  const bob=stunned>0?0:Math.sin(frame*.18)*2;
  ctx.save();ctx.translate(Math.round(x),Math.round(y+bob));
  if(faceDir<0){ctx.translate(62,0);ctx.scale(-1,1)}
  if(stunned>0){ctx.translate(31,24);ctx.rotate(-Math.PI/2);ctx.translate(-31,-24);ctx.globalAlpha=.82}
- // Corpo, patas e pescoço
- rect(12,31,8,18,'#633a83');rect(27,31,8,18,'#633a83');
- rect(8,15,34,23,'#b879e8');rect(5,19,8,13,'#8d54c8');
- rect(31,9,13,25,'#b879e8');rect(35,2,20,19,'#d99cff');
- rect(47,10,13,11,'#d99cff');rect(53,14,8,7,'#f4c4ff');
- // Orelhas, crina, olho e boca
- rect(38,-5,6,10,'#d99cff');rect(49,-3,6,9,'#d99cff');
- rect(40,-3,2,5,'#ff79b8');rect(51,-1,2,4,'#ff79b8');
- rect(32,5,7,18,'#7134a5');rect(29,12,7,7,'#ffcf4a');
- rect(46,8,4,4,'#25133f');rect(45,15,12,7,'#57205e');rect(48,17,7,3,'#ff6f9f');
- rect(2,16,7,7,'#7134a5');rect(0,22,7,7,'#ffcf4a');
+ rect(11,29,31,17,'#d77b39');rect(15,33,27,12,'#f2a044');
+ rect(12,43,8,8,'#493039');rect(34,43,8,8,'#493039');
+ rect(7,27,12,12,'#563238');rect(5,33,8,8,'#d77b39');
+ drawMijaoFace();
  ctx.restore();
  if(stunned>0){text('Zz',x+38,y-10,16,'#fff36a');text('✦',x+4,y+2,12,'#ff75d5')}
- else{
-  const lift=(frame%34)/34*15;
-  text('HA!',faceDir<0?x-25:x+57,y-5-lift,13,'#fff36a');
-  text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5');
- }
+ else{const lift=(frame%34)/34*15;text('HA!',faceDir<0?x-25:x+57,y-5-lift,13,'#fff36a');text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5')}
 }
 function drawCityPedestrians(){
  if(currentPhase!==2)return;
@@ -681,14 +685,8 @@ function drawCastleSecretHall(){
  ctx.fillStyle='#0d0b1d';ctx.fillRect(px-8,78,266,300);
  ctx.fillStyle='#b88b50';ctx.fillRect(px,86,250,282);ctx.fillStyle='#f4d88b';ctx.fillRect(px+8,94,234,266);
  ctx.fillStyle='#34264c';ctx.fillRect(px+18,104,214,262);
- ctx.fillStyle='#65405c';ctx.fillRect(px+45,190,150,112);
- ctx.fillStyle='#9b654f';ctx.fillRect(px+82,145,82,116);
- ctx.fillStyle='#9b654f';ctx.fillRect(px+77,126,24,48);ctx.fillRect(px+145,126,24,48);
- ctx.fillStyle='#5a344f';ctx.fillRect(px+78,140,20,30);ctx.fillRect(px+148,140,20,30);
- ctx.fillStyle='#c17d5b';ctx.fillRect(px+93,205,62,35);ctx.fillRect(px+103,233,42,22);
- ctx.fillStyle='#21162e';ctx.fillRect(px+93,184,18,blink?3:8);ctx.fillRect(px+137,184,18,blink?3:8);
- ctx.fillStyle='#fff0a0';ctx.fillRect(px+98,184,5,5);ctx.fillRect(px+142,184,5,5);
- ctx.fillStyle='#ffcf58';ctx.fillRect(px+92,112,60,12);ctx.fillRect(px+100,98,12,16);ctx.fillRect(px+120,88,14,26);ctx.fillRect(px+141,100,12,14);
+ ctx.save();ctx.translate(px+47,112);ctx.scale(2.65,4.25);drawMijaoFace();ctx.restore();
+ ctx.fillStyle='#ffcf58';ctx.fillRect(px+92,101,60,12);ctx.fillRect(px+100,87,12,16);ctx.fillRect(px+120,77,14,26);ctx.fillRect(px+141,89,12,14);
  ctx.fillStyle='#3b244d';ctx.fillRect(px+48,270,145,50);ctx.fillStyle='#ffe68a';ctx.font='bold 12px monospace';ctx.fillText('RETRATO REAL',px+69,291);
  ctx.fillStyle='#f2d4a0';ctx.font='bold 13px monospace';ctx.fillText('O GRANDE MIJÃO',px+58,340);
  if(near){text('IH... ELE VEM AÍ!',px+34,64,13,'#ff9bd8');if(frame%36<18)text('?!',px+205,125,18,'#fff19a')}
