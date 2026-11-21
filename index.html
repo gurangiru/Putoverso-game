@@ -740,7 +740,7 @@ function update(){
  if((!checkpointActive||(currentPhase===2&&checkpointX<5300))&&player.on&&player.x+player.w/2>=nextCheckpointX){
   checkpointActive=true;
   checkpointX=currentPhase===1?2160:(nextCheckpointX===2250?2230:5310);
-  checkpointY=(currentPhase===1?420:(nextCheckpointX===2250?455:455))-player.h;
+  checkpointY=(currentPhase===1?420:(currentPhase===3?405:455))-player.h;
   playTone(980,.18);updateHud();
  }
  if(player.y>H+40){
