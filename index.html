@@ -626,13 +626,24 @@ function drawLaughHorse(x,y,faceDir=1,stunned=0){
  ctx.save();ctx.translate(Math.round(x),Math.round(y+bob));
  if(faceDir<0){ctx.translate(62,0);ctx.scale(-1,1)}
  if(stunned>0){ctx.translate(31,24);ctx.rotate(-Math.PI/2);ctx.translate(-31,-24);ctx.globalAlpha=.82}
- rect(11,29,31,17,'#d77b39');rect(15,33,27,12,'#f2a044');
- rect(12,43,8,8,'#493039');rect(34,43,8,8,'#493039');
- rect(7,27,12,12,'#563238');rect(5,33,8,8,'#d77b39');
- drawMijaoFace();
+ // Corpo, patas e pescoço
+ rect(12,31,8,18,'#633a83');rect(27,31,8,18,'#633a83');
+ rect(8,15,34,23,'#b879e8');rect(5,19,8,13,'#8d54c8');
+ rect(31,9,13,25,'#b879e8');rect(35,2,20,19,'#d99cff');
+ rect(47,10,13,11,'#d99cff');rect(53,14,8,7,'#f4c4ff');
+ // Orelhas, crina, olho e boca
+ rect(38,-5,6,10,'#d99cff');rect(49,-3,6,9,'#d99cff');
+ rect(40,-3,2,5,'#ff79b8');rect(51,-1,2,4,'#ff79b8');
+ rect(32,5,7,18,'#7134a5');rect(29,12,7,7,'#ffcf4a');
+ rect(46,8,4,4,'#25133f');rect(45,15,12,7,'#57205e');rect(48,17,7,3,'#ff6f9f');
+ rect(2,16,7,7,'#7134a5');rect(0,22,7,7,'#ffcf4a');
  ctx.restore();
  if(stunned>0){text('Zz',x+38,y-10,16,'#fff36a');text('✦',x+4,y+2,12,'#ff75d5')}
- else{const lift=(frame%34)/34*15;text('HA!',faceDir<0?x-25:x+57,y-5-lift,13,'#fff36a');text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5')}
+ else{
+  const lift=(frame%34)/34*15;
+  text('HA!',faceDir<0?x-25:x+57,y-5-lift,13,'#fff36a');
+  text('HA!',faceDir<0?x-37:x+70,y-17-lift*.65,11,'#ff75d5');
+ }
 }
 function drawCityPedestrians(){
  if(currentPhase!==2)return;
