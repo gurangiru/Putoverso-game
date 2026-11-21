@@ -115,7 +115,12 @@ const phase1Discs=[{x:360,y:400,taken:false},{x:1900,y:400,taken:false},{x:4020,
 const phase1Hazards=[{x:650,y:378,w:66,h:42},{x:1080,y:413,w:66,h:42,minX:880,maxX:1190,speed:1.15,dir:1},{x:1840,y:413,w:66,h:42,minX:1680,maxX:2050,speed:1.35,dir:-1},{x:2300,y:378,w:66,h:42},{x:3190,y:378,w:66,h:42,minX:3090,maxX:3270,speed:1.25,dir:1},{x:3970,y:363,w:66,h:42,minX:3870,maxX:4090,speed:1.5,dir:-1},{kind:'note',x:4170,y:365,w:34,h:42,minY:345,maxY:395,speedY:1.15,dirY:1}];
 const phase2Platforms=[{x:0,y:455,w:390,h:100},{x:450,y:415,w:250,h:140},{x:760,y:455,w:330,h:100},{x:1150,y:395,w:260,h:160},{x:1470,y:445,w:390,h:110},{x:1910,y:405,w:270,h:150},{x:2230,y:455,w:360,h:100},{x:2650,y:410,w:300,h:145},{x:3010,y:455,w:380,h:100},{x:3450,y:405,w:280,h:150},{x:3780,y:445,w:340,h:110},{x:4170,y:410,w:300,h:145},{x:4520,y:455,w:360,h:100},{x:4950,y:420,w:280,h:135},{x:5290,y:455,w:300,h:100},{x:5660,y:400,w:260,h:155},{x:5980,y:455,w:360,h:100},{x:6400,y:420,w:180,h:135},{x:6640,y:390,w:190,h:165},{x:6900,y:455,w:300,h:100}];
 const phase2Discs=[{x:560,y:365,taken:false},{x:2050,y:350,taken:false},{x:6740,y:335,taken:false}];
-const phase3Platforms=[{x:0,y:455,w:430,h:100},{x:490,y:410,w:260,h:145},{x:810,y:455,w:350,h:100},{x:1220,y:390,w:280,h:165},{x:1560,y:445,w:360,h:110},{x:1980,y:405,w:300,h:150},{x:2340,y:455,w:360,h:100},{x:2760,y:400,w:300,h:155},{x:3120,y:445,w:380,h:110},{x:3560,y:405,w:280,h:150},{x:3900,y:455,w:360,h:100},{x:4320,y:410,w:300,h:145}];
+const phase3Platforms=[{x:0,y:455,w:430,h:100},{x:490,y:410,w:260,h:145},{x:810,y:455,w:350,h:100},{x:1220,y:390,w:280,h:165},{x:1560,y:445,w:360,h:110},{x:1980,y:405,w:300,h:150},{x:2340,y:455,w:360,h:100},{x:2760,y:400,w:300,h:155},{x:3120,y:445,w:380,h:110},{x:3560,y:405,w:280,h:150},{x:3900,y:455,w:100,h:100},{x:4320,y:410,w:300,h:145}];
+const castleBridge=[{x:4020,y:405,w:72,h:18,offset:0},{x:4140,y:365,w:72,h:18,offset:55},{x:4260,y:405,w:60,h:18,offset:110}];
+const castleTraps=[{x:575,w:38,offset:0},{x:645,w:38,offset:48},{x:715,w:26,offset:96}];
+const castleChandelier={x:1360,baseY:235,range:88,w:48,h:38};
+const castleRuneGate={x:2115,y:330,w:52,h:75,step:0,open:false};
+const castleGhostGust={x:3220,y:350,w:95,h:100};
 const phase3Discs=[{x:570,y:355,taken:false},{x:2150,y:345,taken:false},{x:4030,y:390,taken:false}];
 const phase3Hazards=[{x:880,y:413,w:66,h:42,minX:830,maxX:1080,speed:1.4,dir:1},{x:1630,y:403,w:66,h:42,minX:1580,maxX:1840,speed:1.55,dir:-1},{kind:'note',x:2460,y:365,w:34,h:42,minY:330,maxY:395,speedY:1.3,dirY:1},{x:3210,y:403,w:66,h:42,minX:3160,maxX:3440,speed:1.7,dir:1},{kind:'note',x:4050,y:350,w:34,h:42,minY:320,maxY:385,speedY:1.5,dirY:-1}];
 const phase2Hazards=[{x:820,y:413,w:66,h:42,minX:780,maxX:1020,speed:1.35,dir:1},{x:1570,y:403,w:66,h:42,minX:1500,maxX:1790,speed:1.5,dir:-1},{x:2320,y:413,w:66,h:42,minX:2260,maxX:2540,speed:1.3,dir:1},{x:3530,y:363,w:66,h:42,minX:3470,maxX:3690,speed:1.6,dir:-1},{kind:'note',x:4250,y:350,w:34,h:42,minY:325,maxY:390,speedY:1.25,dirY:1},{x:5060,y:378,w:66,h:42,minX:4990,maxX:5160,speed:1.55,dir:1},{x:5720,y:358,w:66,h:42,minX:5680,maxX:5860,speed:1.7,dir:-1},{kind:'note',x:6100,y:365,w:34,h:42,minY:340,maxY:400,speedY:1.35,dirY:1},{x:6500,y:378,w:66,h:42,minX:6440,maxX:6510,speed:1.8,dir:1},{kind:'note',x:6700,y:340,w:34,h:42,minY:315,maxY:380,speedY:1.5,dirY:-1},{x:6980,y:413,w:66,h:42,minX:6920,maxX:7060,speed:1.9,dir:-1}];
@@ -644,6 +649,18 @@ function drawCityPedestrians(){
   else if(reacting||p.laugh>0){const rise=(72-p.reactionTimer)*.22;text('HA!',x-7,p.y-39-rise,11,'#fff36a');if(p.reactionTimer>22)text('HA!',x+8,p.y-50-rise,9,'#ff75d5')}
  }
 }
+function drawCastleMechanisms(){if(currentPhase!==3)return;
+ // Pisos rúnicos: primeiro avisam, depois levantam espinhos por um curto intervalo.
+ for(const t of castleTraps){const phase=(frame+t.offset)%210,x=t.x-cam,warning=phase>=92&&phase<132,active=phase>=132&&phase<178;if(x<-60||x>W+60)continue;ctx.fillStyle=active?'#9b3b79':warning?'#c49b55':'#55445f';ctx.fillRect(x,398,t.w,12);ctx.fillStyle=active?'#ff83cf':warning?'#ffe68a':'#a98bb4';ctx.fillRect(x+3,398,t.w-6,4);if(active){for(let k=0;k<t.w;k+=12){ctx.fillStyle='#f4d8ff';ctx.beginPath();ctx.moveTo(x+k,398);ctx.lineTo(x+k+6,382);ctx.lineTo(x+k+12,398);ctx.fill()}}else if(warning)text('!',x+t.w/2-3,385,12,'#fff0a6')}
+ // Lustre oscilante com corrente visível e movimento previsível.
+ const cx=castleChandelier.x+Math.sin(frame*.035)*castleChandelier.range,cy=castleChandelier.baseY+Math.abs(Math.sin(frame*.035))*88,lx=cx-cam;if(lx>-80&&lx<W+80){ctx.strokeStyle='#a99ab4';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(lx,0);ctx.lineTo(lx,cy);ctx.stroke();ctx.fillStyle='#6b527b';ctx.fillRect(lx-24,cy,48,castleChandelier.h);ctx.fillStyle='#f5c86d';ctx.fillRect(lx-18,cy+5,36,7);ctx.fillStyle='#fff0a6';ctx.fillRect(lx-5,cy+12,10,13);ctx.fillStyle='#c38be4';ctx.fillRect(lx-29,cy+castleChandelier.h-5,58,6)}
+ // Portão das três notas: cada disparo acerta uma runa da sequência.
+ const g=castleRuneGate,gx=g.x-cam;if(gx>-80&&gx<W+80&&!g.open){ctx.fillStyle='#211a34';ctx.fillRect(gx,g.y,g.w,g.h);ctx.strokeStyle='#c5a5d8';ctx.lineWidth=4;ctx.strokeRect(gx,g.y,g.w,g.h);for(let n=0;n<3;n++){ctx.fillStyle=n<g.step?'#ffe66b':'#69577f';ctx.fillRect(gx+8+n*14,g.y+20,10,24);text(['♪','♫','♬'][n],gx+7+n*14,g.y+38,12,n<g.step?'#fff2a6':'#b9a6c9')}text('3 NOTAS',gx-2,g.y-8,9,'#fff0a6')}else if(g.open&&gx>-80&&gx<W+80){text('ABERTO!',gx-3,g.y-8,10,'#9fffe2')}
+ // Rajada dos fantasmas: o brilho avisa quando o vento está ativo.
+ const w=castleGhostGust,wx=w.x-cam,wind=frame%240>=105&&frame%240<170;if(wx>-120&&wx<W+120){ctx.globalAlpha=wind?.8:.28;for(let n=0;n<4;n++){const yy=w.y+n*22+Math.sin(frame*.12+n)*5;ctx.strokeStyle=wind?'#a9f4ff':'#8c78b5';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(wx-12,yy);ctx.quadraticCurveTo(wx+35,yy-10,wx+82,yy);ctx.stroke()}ctx.globalAlpha=1;if(wind)text('FUUU!',wx+22,w.y-8,11,'#c8f8ff')}
+ // Ponte musical: cada bloco pisca antes de desaparecer e reaparecer.
+ for(const p of castleBridge){const phase=(frame+p.offset)%210,active=phase<132,x=p.x-cam;if(x<-80||x>W+80)continue;ctx.globalAlpha=active?1:.32;ctx.fillStyle=active?'#6b4b91':'#51445f';ctx.fillRect(x,p.y,p.w,p.h);ctx.fillStyle=active?'#74f0ff':'#9b86a8';ctx.fillRect(x,p.y,p.w,4);if(!active)text('♫',x+p.w/2-5,p.y-5,12,'#d9b9ef');ctx.globalAlpha=1}
+}
 function drawHazards(){
  for(const h of jokeHazards){
   let x=h.x-cam;if(x<-110||x>W+100)continue;
@@ -683,8 +700,10 @@ function drawShot(s){ctx.fillStyle='#58f3ff';ctx.beginPath();ctx.arc(s.x-cam,s.y
 function collide(){
  player.on=false;
  for(const p of platforms){if(player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+18&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}
+ if(currentPhase===3){for(const p of castleBridge){const active=((frame+p.offset)%210)<132;if(active&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+20&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}}
 }
 function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0&&shieldTimer<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud()}}}
+function hitCastleMechanisms(){if(currentPhase!==3||player.inv>0||shieldTimer>0)return;let hit=false;for(const t of castleTraps){const phase=(frame+t.offset)%210;if(phase>=132&&phase<178&&player.x+player.w>t.x&&player.x<t.x+t.w&&player.y+player.h>390&&player.y<414)hit=true;}const cx=castleChandelier.x+Math.sin(frame*.035)*castleChandelier.range,cy=castleChandelier.baseY+Math.abs(Math.sin(frame*.035))*88;if(player.x+player.w>cx-24&&player.x<cx+24&&player.y+player.h>cy&&player.y<cy+castleChandelier.h)hit=true;if(hit){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud()}}
 function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
@@ -713,6 +732,8 @@ function update(){
  if(targetH!==player.h){const feet=player.y+player.h;player.h=targetH;player.y=feet-player.h}
  if(player.crouching){if(keys.left){player.vx=-1.8;player.dir=-1}else if(keys.right){player.vx=1.8;player.dir=1}else player.vx*=.65}else if(keys.left){player.vx=-3.2;player.dir=-1}else if(keys.right){player.vx=3.2;player.dir=1}else player.vx*=.78;
  player.x+=player.vx;player.x=Math.max(0,Math.min(worldWidth,player.x));
+ if(currentPhase===3&&!castleRuneGate.open&&player.x+player.w>castleRuneGate.x&&player.x<castleRuneGate.x+castleRuneGate.w){if(player.vx>0)player.x=castleRuneGate.x-player.w;else if(player.vx<0)player.x=castleRuneGate.x+castleRuneGate.w;player.vx=0}
+ if(currentPhase===3){const gustPhase=frame%240;if(gustPhase>=105&&gustPhase<170&&Math.abs((player.x+player.w/2)-(castleGhostGust.x+castleGhostGust.w/2))<castleGhostGust.w/2+player.w){if(shieldTimer<=0)player.vx+=Math.sin(frame*.07)*.12+(player.x<castleGhostGust.x+castleGhostGust.w/2?-.19:.19)}}
  player.vy+=.48;player.y+=player.vy;collide();
  // A fase 2 agora tem dois pontos seguros: o primeiro no meio da cidade e outro na extensão final.
  const nextCheckpointX=currentPhase===1?2200:(checkpointX<5300?2250:5350);
@@ -727,7 +748,7 @@ function update(){
   for(let i=0;i<12;i++)particles.push({x:player.x+17,y:500,t:0,kind:'splash',vx:(Math.random()-.5)*5,vy:-2-Math.random()*3});
   lives--;if(lives<=0)gameOver=true;else respawnAtCheckpoint();updateHud()
  }
- hitHazard();
+ hitHazard();hitCastleMechanisms();
  // Flores soltam pétalas quando a Alpaca passa pertinho delas.
  if(player.on&&frame%4===0){
   for(let i=0;i<34;i++){
@@ -741,6 +762,7 @@ function update(){
  for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;ammo=5;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
  shots=shots.filter(s=>{
   s.x+=s.vx;s.life--;
+  if(currentPhase===3&&!castleRuneGate.open&&s.x>=castleRuneGate.x-4&&s.x<=castleRuneGate.x+castleRuneGate.w+4&&s.y>=castleRuneGate.y&&s.y<=castleRuneGate.y+castleRuneGate.h){castleRuneGate.step++;playTone(520+castleRuneGate.step*100,.09);burstAt(castleRuneGate.x+26,castleRuneGate.y+35);if(castleRuneGate.step>=3){castleRuneGate.open=true;playTone(980,.22)}return false;}
   for(const h of jokeHazards){
    if((h.stunned||0)<=0&&s.x>=h.x-4&&s.x<=h.x+h.w+4&&s.y>=h.y-15&&s.y<=h.y+42){
     h.stunned=180;playTone(300,.12);burstAt(h.x+30,h.y+12);return false;
@@ -760,7 +782,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawHazards();drawCityPedestrians();discs.forEach(drawDisc);
+ drawBackground();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawCityPedestrians();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
@@ -793,8 +815,8 @@ function draw(){
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800;reset();beginGame();}
-function startPhase3(){if(!castleUnlocked)return;currentPhase=3;platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;worldWidth=4700;goalX=4480;reset();beginGame();}
-function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else if(currentPhase===2){platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800}else{platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;worldWidth=4700;goalX=4480}reset();beginGame();}
+function startPhase3(){if(!castleUnlocked)return;currentPhase=3;platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=4700;goalX=4480;reset();beginGame();}
+function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else if(currentPhase===2){platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800}else{platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=4700;goalX=4480}reset();beginGame();}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function activateShield(){if(!started||gameOver||won||shieldCooldown>0)return;shieldTimer=180;shieldCooldown=480;playTone(620,.12);updateHud()}
 function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});
