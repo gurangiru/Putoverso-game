@@ -117,6 +117,8 @@ const phase2Platforms=[{x:0,y:455,w:390,h:100},{x:450,y:415,w:250,h:140},{x:760,
 const phase2Discs=[{x:560,y:365,taken:false},{x:2050,y:350,taken:false},{x:6740,y:335,taken:false}];
 const phase4Platforms=[{x:0,y:455,w:2400,h:100}];
 const phase4Discs=[];const phase4Hazards=[];
+const phase4Traps=[{x:360,w:110,offset:0},{x:760,w:120,offset:70},{x:1160,w:110,offset:140},{x:1580,w:130,offset:35}];
+let bossIntroTimer=0,bossIntroDone=false;
 const phase3Platforms=[{x:0,y:455,w:430,h:100},{x:490,y:410,w:260,h:145},{x:810,y:455,w:350,h:100},{x:1220,y:390,w:280,h:165},{x:1560,y:445,w:360,h:110},{x:1980,y:405,w:300,h:150},{x:2340,y:455,w:360,h:100},{x:2760,y:400,w:300,h:155},{x:3120,y:445,w:380,h:110},{x:3560,y:405,w:280,h:150},{x:3900,y:455,w:100,h:100},{x:4320,y:410,w:300,h:145},{x:4660,y:410,w:980,h:145}];
 const castleBridge=[{x:4020,y:405,w:72,h:18,offset:0},{x:4140,y:365,w:72,h:18,offset:55},{x:4260,y:405,w:60,h:18,offset:110}];
 const castleTraps=[{x:575,w:38,offset:0},{x:645,w:38,offset:48},{x:715,w:26,offset:96}];
@@ -692,6 +694,7 @@ function drawCastleMechanisms(){if(currentPhase!==3)return;
  // Ponte musical: cada bloco pisca antes de desaparecer e reaparecer.
  for(const p of castleBridge){const phase=(frame+p.offset)%210,active=phase<132,x=p.x-cam;if(x<-80||x>W+80)continue;ctx.globalAlpha=active?1:.32;ctx.fillStyle=active?'#6b4b91':'#51445f';ctx.fillRect(x,p.y,p.w,p.h);ctx.fillStyle=active?'#74f0ff':'#9b86a8';ctx.fillRect(x,p.y,p.w,4);if(!active)text('♫',x+p.w/2-5,p.y-5,12,'#d9b9ef');ctx.globalAlpha=1}
 }
+function drawPhase4Traps(){if(currentPhase!==4)return;for(const t of phase4Traps){const x=t.x-cam;if(x<-150||x>W+150)continue;const phase=(frame+t.offset)%180,active=phase>=105&&phase<155,warning=phase>=85&&phase<105;ctx.fillStyle='#21172d';ctx.fillRect(x,448,t.w,7);ctx.fillStyle=active?'#ff5378':warning?'#ffcf65':'#8b6b94';ctx.fillRect(x,440,t.w,8);for(let n=0;n<Math.floor(t.w/22);n++){const tx=x+n*22+5;ctx.fillStyle=active?'#ff6b86':warning?'#ffe18a':'#bd9ac7';ctx.beginPath();ctx.moveTo(tx,440);ctx.lineTo(tx+8,active?420:432);ctx.lineTo(tx+16,440);ctx.fill()}if(warning)text('!',x+t.w/2-3,414,18,'#fff2a8');if(active){ctx.fillStyle='#ff7595';ctx.fillRect(x,438,t.w,3)}}}
 function drawFinalBossArena(){
  if(currentPhase!==4)return;
  const x=1510-cam;
@@ -778,11 +781,13 @@ function collide(){
  if(currentPhase===3){for(const p of castleBridge){const active=((frame+p.offset)%210)<132;if(active&&player.x+player.w>p.x&&player.x<p.x+p.w&&player.y+player.h>=p.y&&player.y+player.h<=p.y+20&&player.vy>=0){player.y=p.y-player.h;player.vy=0;player.on=true}}}
 }
 function hitHazard(){for(const h of jokeHazards){if((h.stunned||0)<=0&&player.x+player.w>h.x&&player.x<h.x+h.w&&player.y+player.h>h.y&&player.y<h.y+h.h&&player.inv<=0&&shieldTimer<=0){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud()}}}
+function hitPhase4Traps(){if(currentPhase!==4||player.inv>0||shieldTimer>0)return;for(const t of phase4Traps){const active=((frame+t.offset)%180)>=105&&((frame+t.offset)%180)<155;if(active&&player.x+player.w>t.x&&player.x<t.x+t.w&&player.y+player.h>420&&player.y<455){focus-=20;player.inv=75;player.vy=-5.5;burstAt(player.x+17,player.y+15);if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud();break}}}
 function hitCastleMechanisms(){if(currentPhase!==3||player.inv>0||shieldTimer>0)return;let hit=false;for(const t of castleTraps){const phase=(frame+t.offset)%210;if(phase>=132&&phase<178&&player.x+player.w>t.x&&player.x<t.x+t.w&&player.y+player.h>390&&player.y<414)hit=true;}const cx=castleChandelier.x+Math.sin(frame*.035)*castleChandelier.range,cy=castleChandelier.baseY+Math.abs(Math.sin(frame*.035))*88;if(player.x+player.w>cx-24&&player.x<cx+24&&player.y+player.h>cy&&player.y<cy+castleChandelier.h)hit=true;if(hit){focus-=25;player.inv=80;player.vy=-6;particles.push({x:player.x+17,y:player.y+10,t:0,kind:'ha'});if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud()}}
 function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+25,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
+ if(currentPhase===4&&bossIntroTimer>0){bossIntroTimer++;player.vx=0;if(bossIntroTimer===55||bossIntroTimer===115||bossIntroTimer===175)playTone(bossIntroTimer===115?380:720,.25);if(bossIntroTimer>=220)bossIntroTimer=0;return}
  if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90){won=true;if(currentPhase===1){cityUnlocked=true;try{localStorage.setItem('putoverso_city_unlocked','yes')}catch(_){}}else if(currentPhase===2){castleUnlocked=true;try{localStorage.setItem('putoverso_castle_unlocked','yes')}catch(_){}}else if(currentPhase===3){finalUnlocked=true;try{localStorage.setItem('putoverso_final_unlocked','yes')}catch(_){}}}return;}
  if(currentPhase===3&&castleFinaleTimer>0){castleFinaleTimer++;player.vx=0;if(castleFinaleTimer===55||castleFinaleTimer===125||castleFinaleTimer===190){playTone(castleFinaleTimer===125?360:720,.2)}if(castleFinaleTimer>=240){castleFinaleTimer=0;castleFinaleDone=true;playTone(880,.2);playTone(1180,.28)}return;}
  updateGroundBirds();
@@ -824,7 +829,8 @@ function update(){
   for(let i=0;i<12;i++)particles.push({x:player.x+17,y:500,t:0,kind:'splash',vx:(Math.random()-.5)*5,vy:-2-Math.random()*3});
   lives--;if(lives<=0)gameOver=true;else respawnAtCheckpoint();updateHud()
  }
- hitHazard();hitCastleMechanisms();
+ hitHazard();hitCastleMechanisms();hitPhase4Traps();
+ if(currentPhase===4&&!bossIntroDone&&player.x>=1840){bossIntroTimer=1;bossIntroDone=true;player.vx=0;playTone(440,.3)}
  // Flores soltam pétalas quando a Alpaca passa pertinho delas.
  if(player.on&&frame%4===0){
   for(let i=0;i<34;i++){
@@ -875,7 +881,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawFinalBossArena();drawCastleSecretHall();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawCityPedestrians();discs.forEach(drawDisc);
+ drawBackground();drawFinalBossArena();drawCastleSecretHall();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawPhase4Traps();drawCityPedestrians();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
@@ -902,13 +908,14 @@ function draw(){
  if(victoryTimer>0){ctx.save();ctx.globalAlpha=Math.min(1,victoryTimer/25);ctx.fillStyle='#fff2a8';ctx.font='bold 18px monospace';for(let i=0;i<12;i++){const a=frame*.16+i*Math.PI/6;ctx.fillText('✦',goalX-cam+Math.cos(a)*(18+victoryTimer*.65),400+Math.sin(a)*(28+victoryTimer*.45))}ctx.restore();}
  ctx.restore();
  if(currentPhase===3&&castleFinaleTimer>0)drawCastleFinaleOverlay();
+ if(currentPhase===4&&bossIntroTimer>0){ctx.fillStyle='#160b25e8';ctx.fillRect(0,0,W,H);ctx.fillStyle='#ffcc66';ctx.font='bold 24px monospace';ctx.textAlign='center';ctx.fillText('AS PORTAS DO TRONO SE ABREM...',W/2,145);ctx.font='bold 20px monospace';ctx.fillStyle='#ff8bd5';ctx.fillText('CAVALO MIJÃO!',W/2,210);ctx.font='16px monospace';ctx.fillStyle='#fff';ctx.fillText('O REI DA MUSGA CHEGOU!',W/2,260);ctx.textAlign='left';}
  if(won){const phaseName=currentPhase===1?'CAMPOS DA DESARMONIA':currentPhase===2?'CIDADE DO DUPLO SENTIDO':currentPhase===3?'CASTELO DA VERGONHA ALHEIA':'ARENA FINAL';const nextName=currentPhase===1?'CIDADE DO DUPLO SENTIDO':currentPhase===2?'CASTELO DA VERGONHA ALHEIA':currentPhase===3?'ARENA DO CAVALO MIJÃO':'FIM';document.getElementById('victoryActions').classList.add('show');document.getElementById('nextPhaseButton').disabled=currentPhase===1?!cityUnlocked:currentPhase===2?!castleUnlocked:currentPhase===3?!finalUnlocked:false;document.getElementById('nextPhaseButton').hidden=false;document.getElementById('nextPhaseButton').textContent=currentPhase===1?'🏙️ IR PARA A FASE 2':currentPhase===2?'🏰 IR PARA A FASE 3':'👑 ENTRAR NA ARENA FINAL';document.getElementById('replayButton').textContent=currentPhase===1?'↻ JOGAR NOVAMENTE':currentPhase===2?'↻ JOGAR FASE 2 NOVAMENTE':'↻ JOGAR FASE 3 NOVAMENTE';ctx.fillStyle='#12092de8';ctx.fillRect(0,0,W,H);text(phaseName,W/2-235,150,24,'#ffe65c');text(currentPhase===3?'CASTELO CONQUISTADO!':'CONCLUÍDOS!',W/2-185,190,26,'#ff8bd5');text(currentPhase===3?'O retrato revelou um segredo...':'A Alpaca recuperou as 3 musgas!',W/2-245,235,15,'#fff');ctx.fillStyle='#2b1859';ctx.fillRect(W/2-210,275,420,115);ctx.strokeStyle='#62eaff';ctx.lineWidth=3;ctx.strokeRect(W/2-210,275,420,115);text('PRÓXIMA AVENTURA',W/2-135,310,15,'#ffe66b');text(nextName,W/2-190,348,16,'#8ff4ff');text(currentPhase===1?'FASE 2 DESBLOQUEADA!':currentPhase===2?'FASE 3 DESBLOQUEADA!':'EM BREVE...',W/2-190,382,14,'#ffe66b');text('Use os botões para continuar',W/2-170,430,14,'#fff')}else if(gameOver){ctx.fillStyle='#12092dcc';ctx.fillRect(0,0,W,H);text('FIM DE JOGO',W/2-115,220,32,'#ffe65c');text('Aperte R para tentar novamente',W/2-205,265,17,'#fff')}
 }
 function loop(){update();draw();requestAnimationFrame(loop)}
 function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800;reset();beginGame();}
 function startPhase3(){if(!castleUnlocked)return;currentPhase=3;platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=5700;goalX=5480;reset();beginGame();}
-function startPhase4(){if(!finalUnlocked)return;currentPhase=4;platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;reset();beginGame();}
-function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else if(currentPhase===2){platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800}else if(currentPhase===3){platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=5700;goalX=5480}else{platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200}reset();beginGame();}
+function startPhase4(){bossIntroTimer=0;bossIntroDone=false;if(!finalUnlocked)return;currentPhase=4;platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;reset();beginGame();}
+function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else if(currentPhase===2){platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800}else if(currentPhase===3){platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=5700;goalX=5480}else{platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;bossIntroTimer=0;bossIntroDone=false}reset();beginGame();}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function activateShield(){if(!started||gameOver||won||shieldCooldown>0)return;shieldTimer=180;shieldCooldown=480;playTone(620,.12);updateHud()}
 function attack(){if(!started||gameOver||won||ammo<=0)return;ammo--;updateHud();playTone(420,.08);player.attack=18;shots.push({x:player.x+(player.dir>0?player.w:0),y:player.y+25,vx:player.dir*7,life:48});
