@@ -831,7 +831,7 @@ function update(){
   lives--;if(lives<=0)gameOver=true;else respawnAtCheckpoint();updateHud()
  }
  hitHazard();hitCastleMechanisms();hitPhase4Traps();
- if(currentPhase===4&&!bossIntroDone&&player.x>=1840){bossIntroTimer=1;bossIntroDone=true;player.vx=0;playTone(440,.3)}
+ if(currentPhase===4&&!bossIntroDone&&player.x>=1280){bossIntroTimer=1;bossIntroDone=true;player.vx=0;playTone(440,.3)}
  // Flores soltam pétalas quando a Alpaca passa pertinho delas.
  if(player.on&&frame%4===0){
   for(let i=0;i<34;i++){
@@ -843,7 +843,7 @@ function update(){
   }
  }
  for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;ammo=5;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
- if(currentPhase===4&&bossActive&&bossHP>0){shots=shots.filter(s=>{if(s.x>1430&&s.x<1595&&s.y>125&&s.y<350){bossHP--;burstAt(1510,250);playTone(600+bossHP*25,.08);if(bossHP<=0){bossActive=false;victoryTimer=1;playTone(980,.3)}return false}return true})}
+ if(currentPhase===4&&bossActive&&bossHP>0){bossShotTimer++;if(bossShotTimer>=115){bossShotTimer=0;bossProjectiles.push({x:1510,y:235,vx:player.x<1510?-4:4,vy:(player.y<230?-2:2),life:150});playTone(260,.12)}bossProjectiles=bossProjectiles.filter(p=>{p.x+=p.vx;p.y+=p.vy;p.life--;if(player.x+player.w>p.x-10&&player.x<p.x+10&&player.y+player.h>p.y-10&&player.y<p.y+10&&player.inv<=0&&shieldTimer<=0){focus-=20;player.inv=70;player.vy=-4;burstAt(p.x,p.y);if(focus<=0){lives--;focus=100;if(lives<=0)gameOver=true;else respawnAtCheckpoint()}updateHud();return false}return p.life>0});shots=shots.filter(s=>{if(s.x>1430&&s.x<1595&&s.y>125&&s.y<350){bossHP--;burstAt(1510,250);playTone(600+bossHP*25,.08);if(bossHP<=0){bossActive=false;victoryTimer=1;playTone(980,.3)}return false}return true})}
  shots=shots.filter(s=>{
   s.x+=s.vx;s.life--;
   if(currentPhase===3&&!castleRuneGate.open&&s.x>=castleRuneGate.x-4&&s.x<=castleRuneGate.x+castleRuneGate.w+4&&s.y>=castleRuneGate.y&&s.y<=castleRuneGate.y+castleRuneGate.h){castleRuneGate.step++;playTone(520+castleRuneGate.step*100,.09);burstAt(castleRuneGate.x+26,castleRuneGate.y+35);if(castleRuneGate.step>=3){castleRuneGate.open=true;playTone(980,.22)}return false;}
@@ -884,7 +884,7 @@ function draw(){
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
  drawBackground();drawFinalBossArena();drawFinalBoss();drawCastleSecretHall();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawPhase4Traps();drawCityPedestrians();discs.forEach(drawDisc);
- shots.forEach(drawShot);
+ shots.forEach(drawShot);if(currentPhase===4)bossProjectiles.forEach(p=>{ctx.fillStyle='#ff65d2';ctx.beginPath();ctx.arc(p.x-cam,p.y,10,0,Math.PI*2);ctx.fill();ctx.fillStyle='#fff3a8';ctx.beginPath();ctx.arc(p.x-cam,p.y,4,0,Math.PI*2);ctx.fill()});
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
   if(p.kind==='petal'){
