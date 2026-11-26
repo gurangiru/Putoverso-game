@@ -79,7 +79,7 @@ canvas{display:block;width:100%;height:auto;image-rendering:pixelated;touch-acti
 <div class="menu-title">PUTOVERSO</div>
 <div class="menu-sub">ALPACA COLORIDA<br>A MUSGA VAI SALVAR O DIA!</div>
 <div><span class="menu-tag">💿 RECUPERE 3 CDs</span><span class="menu-tag">🎧 PROTEJA SEU CONTROLE</span></div>
-<button class="play-button" id="playButton" type="button">▶ JOGAR</button>
+<button class="play-button" id="playButton" type="button">▶ JOGAR</button><div id="phaseSelect" class="phase-select"><div class="menu-sub">ATALHOS — FASES DESBLOQUEADAS</div><button type="button" id="phase2Button" disabled>🏙️ FASE 2</button><button type="button" id="phase3Button" disabled>🏰 FASE 3</button><button type="button" id="phase4Button" disabled>👑 ARENA FINAL</button></div>
 <div class="menu-sub">Setas / A-D para andar · Espaço para pular · X para Onda Sonora</div>
 </div></div><div class="victory-actions" id="victoryActions"><button id="nextPhaseButton" type="button">🏙️ IR PARA A FASE 2</button><button class="secondary" id="replayButton" type="button">↻ JOGAR NOVAMENTE</button></div></div>
 <div class="controls">
@@ -118,7 +118,7 @@ const phase2Discs=[{x:560,y:365,taken:false},{x:2050,y:350,taken:false},{x:6740,
 const phase4Platforms=[{x:0,y:455,w:2400,h:100}];
 const phase4Discs=[];const phase4Hazards=[];
 const phase4Traps=[{x:360,w:110,offset:0},{x:760,w:120,offset:70},{x:1160,w:110,offset:140},{x:1580,w:130,offset:35}];
-let bossIntroTimer=0,bossIntroDone=false;
+let bossIntroTimer=0,bossIntroDone=false,bossHP=12,bossActive=false,bossShotTimer=0,bossProjectiles=[];
 const phase3Platforms=[{x:0,y:455,w:430,h:100},{x:490,y:410,w:260,h:145},{x:810,y:455,w:350,h:100},{x:1220,y:390,w:280,h:165},{x:1560,y:445,w:360,h:110},{x:1980,y:405,w:300,h:150},{x:2340,y:455,w:360,h:100},{x:2760,y:400,w:300,h:155},{x:3120,y:445,w:380,h:110},{x:3560,y:405,w:280,h:150},{x:3900,y:455,w:100,h:100},{x:4320,y:410,w:300,h:145},{x:4660,y:410,w:980,h:145}];
 const castleBridge=[{x:4020,y:405,w:72,h:18,offset:0},{x:4140,y:365,w:72,h:18,offset:55},{x:4260,y:405,w:60,h:18,offset:110}];
 const castleTraps=[{x:575,w:38,offset:0},{x:645,w:38,offset:48},{x:715,w:26,offset:96}];
@@ -695,6 +695,7 @@ function drawCastleMechanisms(){if(currentPhase!==3)return;
  for(const p of castleBridge){const phase=(frame+p.offset)%210,active=phase<132,x=p.x-cam;if(x<-80||x>W+80)continue;ctx.globalAlpha=active?1:.32;ctx.fillStyle=active?'#6b4b91':'#51445f';ctx.fillRect(x,p.y,p.w,p.h);ctx.fillStyle=active?'#74f0ff':'#9b86a8';ctx.fillRect(x,p.y,p.w,4);if(!active)text('♫',x+p.w/2-5,p.y-5,12,'#d9b9ef');ctx.globalAlpha=1}
 }
 function drawPhase4Traps(){if(currentPhase!==4)return;for(const t of phase4Traps){const x=t.x-cam;if(x<-150||x>W+150)continue;const phase=(frame+t.offset)%180,active=phase>=105&&phase<155,warning=phase>=85&&phase<105;ctx.fillStyle='#21172d';ctx.fillRect(x,448,t.w,7);ctx.fillStyle=active?'#ff5378':warning?'#ffcf65':'#8b6b94';ctx.fillRect(x,440,t.w,8);for(let n=0;n<Math.floor(t.w/22);n++){const tx=x+n*22+5;ctx.fillStyle=active?'#ff6b86':warning?'#ffe18a':'#bd9ac7';ctx.beginPath();ctx.moveTo(tx,440);ctx.lineTo(tx+8,active?420:432);ctx.lineTo(tx+16,440);ctx.fill()}if(warning)text('!',x+t.w/2-3,414,18,'#fff2a8');if(active){ctx.fillStyle='#ff7595';ctx.fillRect(x,438,t.w,3)}}}
+function drawFinalBoss(){if(currentPhase!==4||!bossActive||bossHP<=0)return;ctx.save();ctx.translate(1510-cam,245+Math.sin(frame*.06)*4);ctx.scale(2.15,2.15);drawMijaoFace();ctx.restore();ctx.fillStyle="#25152f";ctx.fillRect(1325-cam,85,370,18);ctx.fillStyle="#ff6a91";ctx.fillRect(1328-cam,88,Math.max(0,364*bossHP/12),12);ctx.strokeStyle="#e8c56f";ctx.lineWidth=3;ctx.strokeRect(1325-cam,85,370,18);text("MIJÃO "+bossHP+"/12",1410-cam,75,13,"#fff2a8");}
 function drawFinalBossArena(){
  if(currentPhase!==4)return;
  const x=1510-cam;
@@ -787,8 +788,8 @@ function burst(){for(let i=0;i<14;i++)particles.push({x:player.x+17,y:player.y+2
 function burstAt(x,y){for(let i=0;i<12;i++)particles.push({x,y,t:0,kind:'note',vx:(Math.random()-.5)*5,vy:(Math.random()-.5)*5})}
 function update(){
  frame++;if(!started||gameOver||won)return;
- if(currentPhase===4&&bossIntroTimer>0){bossIntroTimer++;player.vx=0;if(bossIntroTimer===55||bossIntroTimer===115||bossIntroTimer===175)playTone(bossIntroTimer===115?380:720,.25);if(bossIntroTimer>=220)bossIntroTimer=0;return}
- if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90){won=true;if(currentPhase===1){cityUnlocked=true;try{localStorage.setItem('putoverso_city_unlocked','yes')}catch(_){}}else if(currentPhase===2){castleUnlocked=true;try{localStorage.setItem('putoverso_castle_unlocked','yes')}catch(_){}}else if(currentPhase===3){finalUnlocked=true;try{localStorage.setItem('putoverso_final_unlocked','yes')}catch(_){}}}return;}
+ if(currentPhase===4&&bossIntroTimer>0){bossIntroTimer++;player.vx=0;if(bossIntroTimer===55||bossIntroTimer===115||bossIntroTimer===175)playTone(bossIntroTimer===115?380:720,.25);if(bossIntroTimer>=220){bossIntroTimer=0;bossActive=true;playTone(920,.25)}return}
+ if(victoryTimer>0){victoryTimer++;if(victoryTimer>=90){won=true;if(currentPhase===4){try{localStorage.setItem("putoverso_final_completed","yes")}catch(_){}}if(currentPhase===1){cityUnlocked=true;try{localStorage.setItem('putoverso_city_unlocked','yes')}catch(_){}}else if(currentPhase===2){castleUnlocked=true;try{localStorage.setItem('putoverso_castle_unlocked','yes')}catch(_){}}else if(currentPhase===3){finalUnlocked=true;try{localStorage.setItem('putoverso_final_unlocked','yes')}catch(_){}}}return;}
  if(currentPhase===3&&castleFinaleTimer>0){castleFinaleTimer++;player.vx=0;if(castleFinaleTimer===55||castleFinaleTimer===125||castleFinaleTimer===190){playTone(castleFinaleTimer===125?360:720,.2)}if(castleFinaleTimer>=240){castleFinaleTimer=0;castleFinaleDone=true;playTone(880,.2);playTone(1180,.28)}return;}
  updateGroundBirds();
  shieldTimer=Math.max(0,shieldTimer-1);if(shieldCooldown>0)shieldCooldown--;
@@ -842,6 +843,7 @@ function update(){
   }
  }
  for(const d of discs){if(!d.taken&&Math.abs((player.x+17)-d.x)<28&&Math.abs((player.y+24)-d.y)<35){d.taken=true;cds++;ammo=5;focus=Math.min(100,focus+12);playTone(760,.15);updateHud();burst()}}
+ if(currentPhase===4&&bossActive&&bossHP>0){shots=shots.filter(s=>{if(s.x>1430&&s.x<1595&&s.y>125&&s.y<350){bossHP--;burstAt(1510,250);playTone(600+bossHP*25,.08);if(bossHP<=0){bossActive=false;victoryTimer=1;playTone(980,.3)}return false}return true})}
  shots=shots.filter(s=>{
   s.x+=s.vx;s.life--;
   if(currentPhase===3&&!castleRuneGate.open&&s.x>=castleRuneGate.x-4&&s.x<=castleRuneGate.x+castleRuneGate.w+4&&s.y>=castleRuneGate.y&&s.y<=castleRuneGate.y+castleRuneGate.h){castleRuneGate.step++;playTone(520+castleRuneGate.step*100,.09);burstAt(castleRuneGate.x+26,castleRuneGate.y+35);if(castleRuneGate.step>=3){castleRuneGate.open=true;playTone(980,.22)}return false;}
@@ -881,7 +883,7 @@ function draw(){
  // Zoom aplicado somente ao mundo do jogo.
  const zoom=1.28,focusX=player.x-cam+player.w/2,focusY=player.y+player.h/2;
  ctx.save();ctx.translate(W/2,H/2);ctx.scale(zoom,zoom);ctx.translate(-focusX,-focusY);
- drawBackground();drawFinalBossArena();drawCastleSecretHall();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawPhase4Traps();drawCityPedestrians();discs.forEach(drawDisc);
+ drawBackground();drawFinalBossArena();drawFinalBoss();drawCastleSecretHall();drawScenery();drawFlyingCreatures();if(currentPhase===1){drawWater();drawDragonflies()}drawCityPipes();drawPlatforms();if(currentPhase===1){drawPlatformDetails();drawGroundBirds();drawBreeze()}drawAmbientEffects();drawCastleMechanisms();drawHazards();drawPhase4Traps();drawCityPedestrians();discs.forEach(drawDisc);
  shots.forEach(drawShot);
  if(player.inv%10<6){if(shieldTimer>0)drawShield(player.x-cam,player.y,player.anim);if(player.crouching){ctx.save();ctx.translate(0,player.y+player.h-36);ctx.scale(1,.72);alpaca(player.x-cam,0,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,false);ctx.restore()}else alpaca(player.x-cam,player.y,player.anim,player.dir,player.attack,Math.abs(player.vx)>.35,!player.on)}
  particles.forEach(p=>{
@@ -914,7 +916,7 @@ function draw(){
 function loop(){update();draw();requestAnimationFrame(loop)}
 function startPhase2(){if(!cityUnlocked)return;currentPhase=2;platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800;reset();beginGame();}
 function startPhase3(){if(!castleUnlocked)return;currentPhase=3;platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=5700;goalX=5480;reset();beginGame();}
-function startPhase4(){bossIntroTimer=0;bossIntroDone=false;if(!finalUnlocked)return;currentPhase=4;platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;reset();beginGame();}
+function startPhase4(){bossIntroTimer=0;bossIntroDone=false;bossHP=12;bossActive=false;bossShotTimer=0;bossProjectiles=[];if(!finalUnlocked)return;currentPhase=4;platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;reset();beginGame();}
 function replayCurrentPhase(){if(currentPhase===1){platforms=phase1Platforms;discs=phase1Discs;jokeHazards=phase1Hazards;worldWidth=4440;goalX=4335}else if(currentPhase===2){platforms=phase2Platforms;discs=phase2Discs;jokeHazards=phase2Hazards;worldWidth=7200;goalX=6800}else if(currentPhase===3){platforms=phase3Platforms;discs=phase3Discs;jokeHazards=phase3Hazards;castleRuneGate.step=0;castleRuneGate.open=false;worldWidth=5700;goalX=5480}else{platforms=phase4Platforms;discs=phase4Discs;jokeHazards=phase4Hazards;worldWidth=2400;goalX=2200;bossIntroTimer=0;bossIntroDone=false}reset();beginGame();}
 function jump(){if(player.on&&!gameOver&&!won){player.vy=-10.5;player.on=false}}
 function activateShield(){if(!started||gameOver||won||shieldCooldown>0)return;shieldTimer=180;shieldCooldown=480;playTone(620,.12);updateHud()}
@@ -928,9 +930,11 @@ function keyup(e){if(e.key==='ArrowLeft'||e.key==='a')keys.left=false;if(e.key==
 window.addEventListener('keydown',keydown);window.addEventListener('keyup',keyup);
 document.querySelectorAll('[data-key]').forEach(b=>{let k=b.dataset.key;const down=e=>{e.preventDefault();if(k==='left')keys.left=true;if(k==='right')keys.right=true;if(k==='jump')jump();if(k==='attack')attack();if(k==='shield')activateShield();if(k==='crouch')held.crouch=true};const up=e=>{e.preventDefault();if(k==='left')keys.left=false;if(k==='right')keys.right=false;if(k==='crouch')held.crouch=false};b.addEventListener('pointerdown',e=>{try{b.setPointerCapture(e.pointerId)}catch(_){}down(e)});b.addEventListener('pointerup',up);b.addEventListener('pointercancel',up)});
 const startTop=document.getElementById('startTop');
+function refreshPhaseButtons(){document.getElementById("phase2Button").disabled=!cityUnlocked;document.getElementById("phase3Button").disabled=!castleUnlocked;document.getElementById("phase4Button").disabled=!finalUnlocked;}
 function beginGame(){
  started=true;menuScreen.hidden=true;startTop.hidden=true;playTone(660,.12);
 }
+document.getElementById("phase2Button").addEventListener("click",startPhase2);document.getElementById("phase3Button").addEventListener("click",startPhase3);document.getElementById("phase4Button").addEventListener("click",startPhase4);refreshPhaseButtons();
 startTop.addEventListener('click',beginGame);
 document.getElementById('playButton').addEventListener('click',beginGame);
 document.getElementById('nextPhaseButton').addEventListener('click',()=>{if(currentPhase===1)startPhase2();else if(currentPhase===2)startPhase3();else if(currentPhase===3)startPhase4()});
